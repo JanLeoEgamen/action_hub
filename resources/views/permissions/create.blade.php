@@ -1,0 +1,26 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Permissions') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                    <form action="POST">
+                        <div>
+                            <label for="" class="text-sm font-medium">Name</label>
+                            <div class="mb-3">
+                                <input type="text" class="border-gray-300 shadow-sm w-1/2 rounded-lg">
+                            </div>
+                            <button class="bg-slate-700 text-sm rounded-md px-5 py-4 text-white"> Submit</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
