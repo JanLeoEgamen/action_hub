@@ -9,8 +9,9 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <form action="{{ route('permissions.update',  $permission->id) }}" method="post">
+                    <form action="{{ route('permissions.update',  $permission->id) }}" method="POST">
                         @csrf
+                        @method('PUT')
                         <div>
                             <label for="" class="text-sm font-medium">Name</label>
                             <div class="mb-3">

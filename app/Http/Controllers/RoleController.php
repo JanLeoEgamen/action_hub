@@ -3,15 +3,27 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-class RoleController extends Controller
+class RoleController extends Controller implements HasMiddleware
 {
+
+    public static function middleware(): array
+    {
+        return[
+            new Middleware('permission:view task category', only: ['index']),
+            new Middleware('permission:create task category', only: ['create']),
+            new Middleware('permission:edit task category', only: ['edit']),
+            new Middleware('permission:delete task category', only: ['destroy'])
+        ];
+    }
+
     public function index(){
         $roles = Role::orderBy('name', 'ASC')->paginate(10);
-        return view('roles.list', [
+        return view('roles.index', [
             'roles' => $roles
         ]);
     }
@@ -25,77 +37,52 @@ class RoleController extends Controller
     }
 
     public function store(Request $request){
-        $validator = Validator::make($request->all(),[
-            'name' => 'required|unique:roles|min:3'
+
+      $validated  = $request->validate([
+            'name' => 'required|between:4,30' 
+        ], [
+            'name.required' => 'Please enter the role name',
+            'name.between' => 'Please enter characters between 4 to 20'
         ]);
 
-        if($validator->passes()){
-            // dd($request->permission);
-            $role = Role::create(['name' => $request->name]);
-            if(!empty($request->permission)){
-                foreach($request->permission as $name){
-                    $role->givePermissionTo($name);
-                }
+        $role = Role::create(['name' => $request->name]);
+        
+        if(!empty($request->permission)){
+            foreach($request->permission as $name){
+                $role->givePermissionTo($name);
             }
-            return redirect()->route('roles.index')->with('success', 'Role Added Successfully');
-        }else{
-            return redirect()->route('roles.create')->withInput()->withErrors($validator);
         }
+        return redirect()->route('roles.index')->with('success', 'Role Added Successfully');
     }
 
-    public function edit($id){
-        $role = Role::findOrFail($id);
+    public function edit(Role $role){
         $hasPermissions = $role->permissions->pluck('name');
         $permissions = Permission::orderBy('name', 'DESC')->get();
-
-        return view('roles.edit', [
-            'permissions' => $permissions,
-            'hasPermissions' => $hasPermissions,
-            'role' => $role
-        ]);
+        return view('roles.edit', compact('permissions', 'hasPermissions', 'role'));
     }
 
-    public function update($id, Request $request){
-        $role = Role::findOrFail($id);
+    public function update(Request $request, Role $role){
 
-        $validator = Validator::make($request->all(),[
-            'name' => 'required|unique:roles,name,'.$id.',id'
-            
+      $validated  = $request->validate([
+        'name' => 'required|between:4,30' 
+        ], [
+            ' name.required' => 'Please enter the permission name',
+            ' name.between' => 'Please enter characters between 4 to 20',
         ]);
 
-        if($validator->passes()){
-            // $role = Role::create(['name' => $request->name]);
-            $role->name = $request->name;
-            $role->save();
+        $role->update($validated);
 
-            if(!empty($request->permission)){
-                $role->syncPermissions($request->permission);
-            }else{
-                $role->syncPermissions([]);
-            }
-            return redirect()->route('roles.index')->with('success', 'Role Updated Successfully');
+        if(!empty($request->permission)){
+            $role->syncPermissions($request->permission);
         }else{
-            return redirect()->route('roles.edit')->withInput()->withErrors($validator);
+            $role->syncPermissions([]);
         }
+        return redirect()->route('roles.index')->with('success', 'Role Updated Successfully');
+
     }
 
-    public function destroy(Request $request){
-        $id = $request->id;
-        $role = Role::find($id);
-
-        if($role == null){
-            session()->flash('error', 'Role not found');
-            return response()->json([
-                'status' => false
-            ]);
-        }
-
+    public function destroy(Role $role){
         $role->delete();
-
-        session()->flash('success', 'Role Deleted Successfully');
-
-        return response()->json([
-            'status' => true,
-        ]);
+        return redirect()->route('roles.index')->with('success', 'Role deleted successfully');
     }
 }

@@ -8,81 +8,56 @@ use Spatie\Permission\Models\Permission;
 
 class PermissionController extends Controller
 {
-    // shows permssion page
     public function index(){
-    $permissions = Permission::orderBy('created_at')->paginate(10);
-        return view('permissions.list', [
+    $permissions = Permission::orderBy('created_at')->paginate(5);
+        return view('permissions.index', [
             'permissions' => $permissions
         ]);
     }
 
-    // shows create permission page
     public function create(){
 
         return view('permissions.create');
     }
 
-    // store permission in db
     public function store(Request $request){
-        $validator = Validator::make($request->all(),[
-            'name' => 'required|unique:permissions|min:3'
+
+        $validated  = $request->validate([
+        'name' => 'required|between:4,30' 
+        ], [
+            ' name.required' => 'Please enter the permission name',
+            ' name.between' => 'Please enter characters between 4 to 20',
         ]);
 
-        if($validator->passes()){
-            Permission::create(['name' => $request->name]);
-            return redirect()->route('permissions.index')->with('success', 'Permission Added Successfully');
-        }else{
-            return redirect()->route('permissions.create')->withInput()->withErrors($validator);
-        }
-    }
-
-    // shows edit permission page
-    public function edit($id){
-        $permission = Permission::findOrFail($id);
-        return view('permissions.edit', [
-            'permission' => $permission
+        Permission::create([
+            'name' => $request->name,
         ]);
-    }
-
-    // shows create permission page
-    public function update($id, Request $request){
-        $permission = Permission::findOrFail($id);
-        $validator = Validator::make($request->all(),[
-            'name' => 'required|unique:permissions,name,'.$id.',id'
-        ]);
-
-        if($validator->passes()){
-            $permission->name = $request->name;
-            $permission->save();
-            return redirect()->route('permissions.index')->with('success', 'Permission Updated Successfully');
-        }else{
-            return redirect()->route('permissions.edit', $id)->withInput()->withErrors($validator);
-        }
+        
+        return redirect()->route('permissions.index')->with('success', 'Permission added successfully');
 
     }
 
+    public function edit(Permission $permission){
+        return view('permissions.edit', compact('permission'));
+    }
 
-    // delete permissions in db
+    public function update(Request $request, Permission $permission){
+        $validated  = $request->validate([
+        'name' => 'required|between:4,30' 
+        ], [
+            ' name.required' => 'Please enter the permission name',
+            ' name.between' => 'Please enter characters between 4 to 20',
+        ]);
 
-    public function destroy(Request $request){
-        $id = $request->id;
+        $permission->update($validated);
+        
+        return redirect()->route('permissions.index')->with('success', 'Permission udpated successfully');
+    }
 
-        $permission = Permission::find($id);
 
-        if ($permission == null) {
-            session()->flash('error', 'Permission not found');
-            return response()->json([
-                'status' => false
-            ]);
-        }
-
+    public function destroy(Permission $permission){
         $permission->delete();
-
-        session()->flash('success', 'Permission Deleted Successfully');
-
-        return response()->json([
-            'status' => true,
-        ]);
+        return redirect()->route('permissions.index')->with('success', 'Permission deleted successfully');
     }
 
 }
