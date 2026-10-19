@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Yajra\DataTables\Facades\DataTables;
 
 class TaskCategoryController extends Controller implements HasMiddleware
 {
@@ -21,14 +22,16 @@ class TaskCategoryController extends Controller implements HasMiddleware
         ];
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $taskCategories = TaskCategory::orderBy('created_at')
-            ->paginate(10);
+        if($request->ajax()){
+            $taskCategories = TaskCategory::query();
+            
 
-        return view('task-categories.index', [
-            'taskCategories' => $taskCategories
-        ]);
+            return DataTables::eloquent($taskCategories)->make(true);
+        }
+
+        return view('task-categories.index');
     }
 
     public function create()

@@ -31,13 +31,40 @@ class UserController extends Controller implements HasMiddleware
 
     public function create()
     {
-        return view('users.create');
+        $roles = Role::orderBy('name', 'ASC')->get();
+
+        return view('users.create', compact('roles'));
     }
 
 
     public function store(Request $request)
     {
+        $validated  = $request->validate([
+        'first_name' => 'required',
+        'last_name' => 'required|between:4,30',
+        'email' => 'required|email',
+        'password' => 'required|same:confirm_password', 
+        'confirm_password' => 'required' 
+        ], [
+            'first_name.required' => 'Please enter the permission name',
+            'last_name.between' => 'Please enter characters between 4 to 20',
+            'email.between' => 'Please enter characters between 4 to 20',
+            'email.email' => 'Please enter you email',
+            'password.required' => 'Please enter your password',
+            'password.same' => 'Password did not match',
+        ]);
+
+        $user = User::create([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'password' => $request->password,
+            'email' => $request->email,
+        ]);
         
+        $user->syncRoles($request->role);
+
+
+        return redirect()->route('users.index')->with('success', 'User Added Successfully');
     }
 
 
