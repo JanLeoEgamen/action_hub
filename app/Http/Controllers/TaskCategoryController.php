@@ -4,92 +4,135 @@ namespace App\Http\Controllers;
 
 use App\Models\TaskCategory;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Carbon;
 
 class TaskCategoryController extends Controller implements HasMiddleware
 {
     public static function middleware(): array
     {
-        return[
+        return [
             new Middleware('permission:view task categories', only: ['index']),
-            new Middleware('permission:create task categories', only: ['create']),
-            new Middleware('permission:edit task categories', only: ['edit']),
-            new Middleware('permission:delete task categories', only: ['destroy'])
+            new Middleware('permission:create task categories', only: ['store']),
+            new Middleware('permission:edit task categories', only: ['show', 'update']),
+            new Middleware('permission:delete task categories', only: ['destroy']),
         ];
     }
 
+    // Display page and DataTable data
     public function index(Request $request)
     {
-        if($request->ajax()){
-            $taskCategories = TaskCategory::query();
-            
+        if ($request->ajax()) {
+            return DataTables::collection(TaskCategory::getAll())
+                ->addColumn('created_at', function ($category) {
+                    return $category->created_at
+                        ? Carbon::parse($category->created_at)->format('Y-m-d')
+                        : '';
+                })
+                ->addColumn('is_active', function ($category) {
+                    return $category->is_active
+                        ? 'Active'
+                        : 'Inactive';
+                })
+                ->addColumn('action', function ($category) {
+                    return '
+                        <button type="button"
+                            data-id="' . $category->id . '"
+                            class="btn btn-success btn-sm edit-taskCategory">
+                            Edit
+                        </button>
 
-            return DataTables::eloquent($taskCategories)->make(true);
+                        <button type="button"
+                            data-id="' . $category->id . '"
+                            class="btn btn-danger btn-sm delete-taskCategory">
+                            Delete
+                        </button>
+                    ';
+                })
+                ->addIndexColumn()
+                ->rawColumns(['action'])
+                ->make(true);
         }
 
         return view('task-categories.index');
     }
 
-    public function create()
+    // Return category data for editing; null ID means create
+    public function show($id = null)
     {
-        return view('task-categories.create');
+        if (!$id) {
+            return response()->json([]);
+        }
+
+        $category = TaskCategory::findById($id);
+
+        if (!$category) {
+            return response()->json([
+                'message' => 'Task category not found.',
+            ], 404);
+        }
+
+        return response()->json($category);
     }
 
+    // Create category
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|between:4,30',
-            'description' => 'required|between:4,30',
-            'is_active' => 'required|boolean'
-        ], [
-            'name.required' => 'Please enter the category name',
-            'name.between' => 'Please enter characters between 4 to 20',           
-            'description.required' => 'Please enter characters between 4 to 20',
-            'description.between' => 'Please enter characters between 4 to 20'
+            'name' => 'required|string|between:4,30',
+            'description' => 'required|string|between:4,30',
+            'is_active' => 'required|boolean',
         ]);
 
-        TaskCategory::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'is_active' => $request->is_active,
+        TaskCategory::createCategory($validated);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Task category created successfully.',
         ]);
-
-        return redirect()->route('task-categories.index')->with('success', 'Task Category Added Successfully');
-
     }
 
-    public function edit(TaskCategory $taskCategory)
-    {
-
-        return view('task-categories.edit', compact('taskCategory'));
-    }
-
-    public function update(Request $request, TaskCategory $taskCategory)
+    // Update category
+    public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'name' => 'required|between:4,30',
-            'description' => 'required|between:4,30',
-            'is_active' => 'required|boolean'
-        ], [
-            'name.required' => 'Please enter the category name',
-            'name.between' => 'Please enter characters between 4 to 20',           
-            'description.required' => 'Please category description',
-            'description.between' => 'Please enter characters between 4 to 20'
+            'name' => 'required|string|between:4,30',
+            'description' => 'required|string|between:4,30',
+            'is_active' => 'required|boolean',
         ]);
-        
-        $taskCategory->update($validated);
-        return redirect()->route('task-categories.index')->with('success', 'Task Category Updated Successfully');
 
+        if (!TaskCategory::existsById($id)) {
+            return response()->json([
+                'message' => 'Task category not found.',
+            ], 404);
+        }
+
+        TaskCategory::updateCategory($id, $validated);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Task category updated successfully.',
+        ]);
     }
 
-    public function destroy(TaskCategory $taskCategory)
+    // Soft-delete category
+    public function destroy($id)
     {
-        $taskCategory->delete();
-        return redirect()->route('task-categories.index')->with('success', 'Task Category deleted successfully');
+        if (!TaskCategory::existsById($id)) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Task category not found.',
+            ], 404);
+        }
 
+        TaskCategory::deleteCategory($id);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Task category deleted successfully.',
+        ]);
     }
 }

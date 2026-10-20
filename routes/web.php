@@ -48,12 +48,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
 
     // TaskCategory
+
     Route::get('/task-categories', [TaskCategoryController::class, 'index'])->name('task-categories.index');
-    Route::get('/task-categories/create', [TaskCategoryController::class, 'create'])->name('task-categories.create');
     Route::post('/task-categories', [TaskCategoryController::class, 'store'])->name('task-categories.store');
-    Route::get('/task-categories/{taskCategory}/edit', [TaskCategoryController::class, 'edit'])->name('task-categories.edit');
-    Route::put('/task-categories/{taskCategory}', [TaskCategoryController::class, 'update'])->name('task-categories.update');
-    Route::delete('/task-categories/{taskCategory}', [TaskCategoryController::class, 'destroy'])->name('task-categories.destroy');
+    Route::get('/task-categories/{id}/data', [TaskCategoryController::class, 'show'])
+        ->whereNumber('id')->name('task-categories.show');
+    Route::put('/task-categories/{id}', [TaskCategoryController::class, 'update'])
+        ->whereNumber('id')->name('task-categories.update');
+
+    Route::delete('/task-categories/{id}', [TaskCategoryController::class, 'destroy'])
+    ->whereNumber('id')->name('task-categories.destroy');
 
     // Task
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
