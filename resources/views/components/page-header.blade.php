@@ -1,17 +1,25 @@
 @props([
     'title',
-    'createText' => 'Create',
-    'createId' => 'createRecord',
+    'actionLabel' => null,
+    'actionId' => null,
+    'permission' => null,
 ])
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">{{ $title }}</h4>
+<div class="flex justify-between items-center">
+    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        {{ __($title) }}
+    </h2>
 
-    <button
-        type="button"
-        class="btn btn-primary"
-        id="{{ $createId }}"
-    >
-        {{ $createText }}
-    </button>
+    @if($actionLabel && $actionId)
+        @can($permission)
+            <button
+                type="button"
+                id="{{ $actionId }}"
+                class="bg-slate-700 text-sm rounded-md
+                       px-5 py-3 text-white hover:bg-slate-600"
+            >
+                {{ $actionLabel }}
+            </button>
+        @endcan
+    @endif
 </div>

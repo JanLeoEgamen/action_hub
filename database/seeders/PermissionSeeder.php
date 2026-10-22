@@ -14,7 +14,7 @@ class PermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        $policies = ['user', 'roles', 'task categories'];
+        $policies = ['user', 'roles', 'task categories', 'tasks'];
 
         foreach ($policies as $policy) {
             $actions = ['view', 'create', 'edit', 'delete'];

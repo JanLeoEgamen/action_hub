@@ -38,19 +38,27 @@ class TaskCategoryController extends Controller implements HasMiddleware
                         : 'Inactive';
                 })
                 ->addColumn('action', function ($category) {
-                    return '
-                        <button type="button"
-                            data-id="' . $category->id . '"
-                            class="btn btn-success btn-sm edit-taskCategory">
-                            Edit
-                        </button>
+                    $buttons = '';
 
-                        <button type="button"
-                            data-id="' . $category->id . '"
-                            class="btn btn-danger btn-sm delete-taskCategory">
-                            Delete
-                        </button>
-                    ';
+                    if (auth()->user()->can('edit task categories')) {
+                        $buttons .= '
+                            <button type="button"
+                                data-id="' . $category->id . '"
+                                class="btn btn-success btn-sm edit-taskCategory">
+                                Edit
+                            </button> ';
+                    }
+
+                    if (auth()->user()->can('delete task categories')) {
+                        $buttons .= '
+                            <button type="button"
+                                data-id="' . $category->id . '"
+                                class="btn btn-danger btn-sm delete-taskCategory">
+                                Delete
+                            </button>';
+                    }
+
+                    return $buttons ?: '—';
                 })
                 ->addIndexColumn()
                 ->rawColumns(['action'])

@@ -1,25 +1,18 @@
 
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Task Categories') }}
-            </h2>
-
-            <button type="button" id="create-taskCategory"
-                class="bg-slate-700 text-sm rounded-md px-5 py-3 text-white hover:bg-slate-600">
-                Create
-            </button>
-        </div>
+        <x-page-header
+            title="Task Categories"
+            action-label="Create"
+            action-id="create-taskCategory"
+            permission="create task categories"
+        />
     </x-slot>
 
     <div class="container py-5">
         <div id="successMessage" class="alert alert-success d-none"></div>
 
         <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Task Categories</h5>
-            </div>
 
             <div class="card-body">
                 <div class="table-responsive">
@@ -94,41 +87,13 @@
 
 
     <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteCategoryModal" tabindex="-1"
-        aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
-
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteCategoryModalLabel">
-                        Confirm Delete
-                    </h5>
-                    <button type="button" class="btn-close"
-                        data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <div class="modal-body">
-                    Are you sure you want to delete this category?
-                    This action cannot be undone.
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary"
-                        data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-
-                    <button type="button" class="btn btn-danger"
-                        id="confirmDeleteCategory">
-                        Delete
-                    </button>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
+    <x-delete-confirmation-modal
+        id="deleteCategoryModal"
+        title="Confirm Delete"
+        message="Are you sure you want to delete this category?"
+        confirm-button-id="confirmDeleteCategory"
+        confirm-label="Delete"
+    />
 
     @push('scripts')
         <script>

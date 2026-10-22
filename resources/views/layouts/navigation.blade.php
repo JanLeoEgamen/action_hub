@@ -16,32 +16,37 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                 </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('permissions.index')" :active="request()->routeIs('permission.index')">
-                        {{ __('Permissions') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('roles.index')" :active="request()->routeIs('roles.index')">
-                        {{ __('Roles') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('task-categories.index')" :active="request()->routeIs('task-categories.index')">
-                        {{ __('Task categories') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.index')">
-                        {{ __('Tasks') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
-                        {{ __('Users') }}
-                    </x-nav-link>
-                </div>
+                @can('view roles')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('roles.index')" :active="request()->routeIs('roles.index')">
+                            {{ __('Roles') }}
+                        </x-nav-link>
+                    </div>
+                @endcan
 
+                @can('view task categories')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('task-categories.index')" :active="request()->routeIs('task-categories.index')">
+                            {{ __('Task categories') }}
+                        </x-nav-link>
+                    </div>
+                @endcan
+
+                @can('view tasks')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.index')">
+                            {{ __('Tasks') }}
+                        </x-nav-link>
+                    </div>
+                @endcan
+
+                @can('view users')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
+                            {{ __('Users') }}
+                        </x-nav-link>
+                    </div>
+                @endcan
             </div>
 
             <!-- Settings Dropdown -->
@@ -95,9 +100,6 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('permissions.index')" :active="request()->routeIs('permissions.index')">
-                {{ __('Permission') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('roles.index')" :active="request()->routeIs('roles.index')">
                 {{ __('Roles') }}
