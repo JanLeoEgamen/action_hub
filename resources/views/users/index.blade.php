@@ -22,6 +22,7 @@
                                 <th>Last Name</th>
                                 <th>Email</th>
                                 <th>Role</th>
+                                <th>Group</th>
                                 <th>Created At</th>
                                 <th>Action</th>
                             </tr>
@@ -97,6 +98,18 @@
                                 class="form-control"
                                 required
                                 maxlength="255">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="group_id" class="form-label">Group</label>
+                            <select name="group_id" id="group_id" class="form-select">
+                                <option value="">Select Group (Optional)</option>
+                                @foreach($groups as $group)
+                                    <option value="{{ $group->id }}">
+                                        {{ $group->company_name }} - {{ $group->department_name }} - {{ $group->group_name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
 
                         <div class="mb-3">
@@ -208,6 +221,7 @@
                         { data: 'last_name', name: 'last_name' },
                         { data: 'email', name: 'email' },
                         { data: 'roles', name: 'roles' },
+                        { data: 'group', name: 'group' },
                         { data: 'created_at', name: 'created_at' },
                         {
                             data: 'action',
@@ -270,6 +284,7 @@
                             $('#first_name').val(user.first_name);
                             $('#last_name').val(user.last_name);
                             $('#email').val(user.email);
+                            $('#group_id').val(user.group_id ? String(user.group_id) : '');
 
                             $('#role_id').val(
                                 user.role_id ? String(user.role_id) : ''

@@ -47,6 +47,31 @@
                         </x-nav-link>
                     </div>
                 @endcan
+
+                @can('view companies')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('companies.index')" :active="request()->routeIs('companies.index')">
+                            {{ __('Companies') }}
+                        </x-nav-link>
+                    </div>
+                @endcan
+
+                @can('view departments')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('departments.index')" :active="request()->routeIs('departments.index')">
+                            {{ __('Departments') }}
+                        </x-nav-link>
+                    </div>
+                @endcan
+
+                @can('view projects')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.index')">
+                            {{ __('Projects') }}
+                        </x-nav-link>
+                    </div>
+                @endcan
+
             </div>
 
             <!-- Settings Dropdown -->

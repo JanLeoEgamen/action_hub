@@ -20,6 +20,7 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
+        'group_id', 
     ];
 
     protected $hidden = [
@@ -59,38 +60,32 @@ class User extends Authenticatable
         return DB::table('users')
             ->leftJoin('model_has_roles', function ($join) {
                 $join->on('users.id', '=', 'model_has_roles.model_id')
-                    ->where(
-                        'model_has_roles.model_type',
-                        '=',
-                        self::class
-                    );
+                    ->where('model_has_roles.model_type', '=', self::class);
             })
-            ->leftJoin(
-                'roles',
-                'model_has_roles.role_id',
-                '=',
-                'roles.id'
-            )
+            ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
+            ->leftJoin('groups', 'users.group_id', '=', 'groups.id') // Join groups
+            ->whereNull('users.deleted_at')
             ->select(
                 'users.id',
                 'users.first_name',
                 'users.last_name',
                 'users.email',
                 'users.created_at',
-                DB::raw(
-                    "GROUP_CONCAT(DISTINCT roles.name ORDER BY roles.name SEPARATOR ', ') as roles"
-                )
+                'groups.group_name', 
+                DB::raw("GROUP_CONCAT(DISTINCT roles.name ORDER BY roles.name SEPARATOR ', ') as roles")
             )
             ->groupBy(
                 'users.id',
                 'users.first_name',
                 'users.last_name',
                 'users.email',
-                'users.created_at'
+                'users.created_at',
+                'groups.group_name'
             )
             ->orderByDesc('users.created_at')
             ->get();
     }
+
 
     // Find one user and retrieve the assigned role ID.
     public static function findById($id)
@@ -98,30 +93,22 @@ class User extends Authenticatable
         return DB::table('users')
             ->leftJoin('model_has_roles', function ($join) {
                 $join->on('users.id', '=', 'model_has_roles.model_id')
-                    ->where(
-                        'model_has_roles.model_type',
-                        '=',
-                        self::class
-                    );
+                    ->where('model_has_roles.model_type', '=', self::class);
             })
-            ->leftJoin(
-                'roles',
-                'model_has_roles.role_id',
-                '=',
-                'roles.id'
-            )
+            ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
             ->where('users.id', $id)
             ->select(
                 'users.id',
                 'users.first_name',
                 'users.last_name',
                 'users.email',
+                'users.group_id',
                 'roles.id as role_id'
             )
             ->first();
     }
 
-    // Create a user.
+    // Create a user
     public static function createUser(array $data)
     {
         return DB::table('users')->insertGetId([
@@ -129,6 +116,7 @@ class User extends Authenticatable
             'last_name' => $data['last_name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'group_id' => $data['group_id'] ?? null, 
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -141,18 +129,17 @@ class User extends Authenticatable
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
             'email' => $data['email'],
+            'group_id' => $data['group_id'] ?? null, // Add this
             'updated_at' => now(),
         ];
 
-        // Change the password only if a new one is provided
         if (!empty($data['password'])) {
             $userData['password'] = Hash::make($data['password']);
         }
 
-        return DB::table('users')
-            ->where('id', $id)
-            ->update($userData);
+        return DB::table('users')->where('id', $id)->update($userData);
     }
+
 
     // Delete a user
     public static function deleteUser($id)

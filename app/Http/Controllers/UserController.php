@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -61,9 +62,9 @@ class UserController extends Controller implements HasMiddleware
                 ->make(true);
         }
 
+        $groups = Group::getAll();
         $roles = Role::orderBy('name', 'ASC')->get();
-
-        return view('users.index', compact('roles'));
+        return view('users.index', compact('roles', 'groups'));
     }
 
     // Return user data for editing.
@@ -91,6 +92,7 @@ class UserController extends Controller implements HasMiddleware
             'confirm_password' => 'required|string',
             'roles' => 'required|array|min:1',
             'roles.*' => 'required|integer|distinct|exists:roles,id',
+            'group_id' => 'nullable|integer|exists:groups,id',
         ]);
 
         $userId = User::createUser($validated);
@@ -129,6 +131,7 @@ class UserController extends Controller implements HasMiddleware
             'confirm_password' => 'required_with:password|nullable|string',
             'roles' => 'required|array|min:1',
             'roles.*' => 'required|integer|distinct|exists:roles,id',
+            'group_id' => 'nullable|integer|exists:groups,id', 
         ]);
 
         User::updateUser($id, $validated);
