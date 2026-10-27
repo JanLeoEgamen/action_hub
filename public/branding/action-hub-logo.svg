@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 112" width="352" height="112" role="img" aria-label="Action Hub">
+    <defs>
+        <linearGradient id="actionHubLockupBadge" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#4f46e5" />
+            <stop offset="1" stop-color="#7c3aed" />
+        </linearGradient>
+    </defs>
+    <!-- Mark: the 512 icon scaled to 80px, aligned to the wordmark -->
+    <g transform="translate(0,16) scale(0.15625)">
+        <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#actionHubLockupBadge)" />
+        <path d="M268 136 L148 280 H256 L244 376 L364 232 H256 Z" fill="#ffffff" />
+    </g>
+    <!-- Wordmark: app font stack, falls back to the system sans -->
+    <text x="104" y="71" font-family="Figtree, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="46" font-weight="600" letter-spacing="-0.5" fill="#111827">Action Hub</text>
+</svg>

@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Alpine: keep x-show elements hidden until Alpine boots */
+[x-cloak] {
+    display: none !important;
+}
+
+/* Collapsible sidebar.
+   CSS owns the layout (rail width, hidden labels, content offset) so the markup can
+   never desync from the viewport; Alpine only toggles html.is-collapsed (desktop
+   preference) and the mobile drawer. */
+@media (min-width: 1024px) {
+    html.is-collapsed #app-sidebar {
+        width: 5rem;
+    }
+
+    html.is-collapsed .app-shell-main {
+        padding-left: 5rem;
+    }
+
+    html.is-collapsed .sidebar-hide-rail {
+        display: none;
+    }
+
+    html.is-collapsed .sidebar-rail-center {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+    }
+ 
+}
+
+@media (max-width: 1023.98px) {
+    #app-sidebar.is-drawer-open {
+        transform: none;
+    }
+}

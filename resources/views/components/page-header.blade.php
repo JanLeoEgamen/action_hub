@@ -2,6 +2,8 @@
     'title',
     'actionLabel' => null,
     'actionId' => null,
+    'actionUrl' => null,
+    'actionModal' => null,
     'permission' => null,
 ])
 
@@ -15,6 +17,11 @@
             <button
                 type="button"
                 id="{{ $actionId }}"
+                @if($actionUrl && $actionModal)
+                    data-crud-open
+                    data-crud-target="{{ $actionModal }}"
+                    data-crud-url="{{ $actionUrl }}"
+                @endif
                 class="bg-slate-700 text-sm rounded-md
                        px-5 py-3 text-white hover:bg-slate-600"
             >
