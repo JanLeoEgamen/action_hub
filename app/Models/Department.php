@@ -59,4 +59,20 @@ class Department extends Model
     {
         return DB::table('departments')->where('id', $id)->whereNull('deleted_at')->exists();
     }
+
+    public static function getDeptCounts()
+    {
+        return DB::table('departments')
+            ->join('companies', 'companies.id', '=', 'departments.company_id')
+            ->select('companies.company_name', 'departments.department_name', DB::raw('count(*) as total'))
+            ->whereNull('departments.deleted_at')
+            ->whereNull('companies.deleted_at')
+            ->groupBy('companies.id', 'departments.id')
+            ->get();
+    }
+
+    public static function getCount(): int
+    {
+        return DB::table('departments')->whereNull('deleted_at')->count();
+    }
 }

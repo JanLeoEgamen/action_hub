@@ -14,6 +14,8 @@
                                 <th>No.</th>
                                 <th>Company</th>
                                 <th>Department Name</th>
+                                <th>Description</th>
+                                <th>Status</th>
                                 <th>Created At</th>
                                 <th>Action</th>
                             </tr>
@@ -59,9 +61,12 @@
                             <textarea name="department_description" id="department_description" class="form-control" rows="3"></textarea>
                         </div>
 
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" name="is_active" id="is_active" class="form-check-input" value="1" checked>
-                            <label for="is_active" class="form-check-label">Active</label>
+                        <div class="mb-3">
+                            <label for="is_active" class="form-label">Status</label>
+                            <select name="is_active" id="is_active" class="form-select" required>
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -90,6 +95,8 @@
                         { data: 'DT_RowIndex', orderable: false, searchable: false },
                         { data: 'company_name' },
                         { data: 'department_name' },
+                        { data: 'department_description' },
+                        { data: 'is_active' },
                         { data: 'created_at' },
                         { data: 'action', orderable: false, searchable: false }
                     ]
@@ -99,7 +106,7 @@
                     $('#departmentForm')[0].reset();
                     $('#department_id').val('');
                     $('#formErrors').addClass('d-none').empty();
-                    $('#is_active').prop('checked', true);
+                    $('#is_active').val('1');
                 }
 
                 $('#create-department').on('click', function () {
@@ -120,7 +127,7 @@
                             $('#company_id').val(data.company_id);
                             $('#department_name').val(data.department_name);
                             $('#department_description').val(data.department_description);
-                            $('#is_active').prop('checked', data.is_active == 1);
+                            $('#is_active').val(data.is_active);
                             
                             $('#modalTitle').text('Edit Department');
                             $('#saveDepartment').text('Update');

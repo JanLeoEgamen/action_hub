@@ -55,4 +55,22 @@ class Company extends Model
     {
         return DB::table('companies')->where('id', $id)->whereNull('deleted_at')->exists();
     }
+
+    public static function getUserCounts()
+    {
+        return DB::table('companies')
+            ->leftJoin('departments', 'departments.company_id', '=', 'companies.id')
+            ->leftJoin('groups', 'groups.department_id', '=', 'departments.id')
+            ->leftJoin('users', 'users.group_id', '=', 'groups.id')
+            ->select('companies.company_name', DB::raw('count(DISTINCT users.id) as total'))
+            ->whereNull('companies.deleted_at')
+            ->whereNull('users.deleted_at')
+            ->groupBy('companies.id', 'companies.company_name')
+            ->get();
+    }
+
+    public static function getCount(): int
+    {
+        return DB::table('companies')->whereNull('deleted_at')->count();
+    }
 }

@@ -239,6 +239,109 @@ class Project extends Model
     }
 
     // ---------------------------------------------------------------
+    // Dashboard
+    // ---------------------------------------------------------------
+
+    public static function getStatusCounts()
+    {
+        return DB::table('projects')
+            ->select('status', DB::raw('count(*) as total'))
+            ->whereNull('deleted_at')
+            ->groupBy('status')
+            ->get();
+    }
+
+    public static function getMonthlyCounts()
+    {
+        return DB::table('projects')
+            ->select(DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"), DB::raw('count(*) as total'))
+            ->whereNull('deleted_at')
+            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+    }
+
+    public static function getOwnerCounts()
+    {
+        return DB::table('projects')
+            ->join('users as owners', 'owners.id', '=', 'projects.owner_id')
+            ->select('owners.first_name', 'owners.last_name', DB::raw('count(*) as total'))
+            ->whereNull('projects.deleted_at')
+            ->whereNull('owners.deleted_at')
+            ->groupBy('owners.id', 'owners.first_name', 'owners.last_name')
+            ->orderByDesc('total')
+            ->limit(10)
+            ->get();
+    }
+
+    public static function getAvgDurationByStatus()
+    {
+        return DB::table('projects')
+            ->select('status', DB::raw('AVG(DATEDIFF(COALESCE(end_date, CURDATE()), start_date)) as avg_days'))
+            ->whereNull('deleted_at')
+            ->whereNotNull('start_date')
+            ->groupBy('status')
+            ->get();
+    }
+
+    public static function getTotals(): array
+    {
+        return [
+            'projects' => DB::table('projects')->whereNull('deleted_at')->count(),
+            'active' => DB::table('projects')->where('is_active', 1)->whereNull('deleted_at')->count(),
+            'completed' => DB::table('projects')->where('status', 'completed')->whereNull('deleted_at')->count(),
+        ];
+    }
+
+    // ---------------------------------------------------------------
+    // Dashboard - Personal (my overview)
+    // ---------------------------------------------------------------
+
+    protected static function personalBase(int $userId)
+    {
+        return DB::table('projects')
+            ->whereNull('deleted_at')
+            ->where(function ($q) use ($userId) {
+                $q->where('owner_id', $userId)
+                    ->orWhereIn('id', function ($sub) use ($userId) {
+                        $sub->select('project_id')
+                            ->from('project_members')
+                            ->where('user_id', $userId)
+                            ->where('is_active', 1)
+                            ->whereNull('deleted_at');
+                    });
+            });
+    }
+
+    public static function getPersonalStatusCounts(int $userId)
+    {
+        return self::personalBase($userId)
+            ->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->get();
+    }
+
+    public static function getPersonalMonthlyCounts(int $userId)
+    {
+        return self::personalBase($userId)
+            ->select(DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"), DB::raw('count(*) as total'))
+            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+    }
+
+    public static function getPersonalTotals(int $userId): array
+    {
+        return [
+            'projects' => self::personalBase($userId)->count(),
+            'active' => self::personalBase($userId)->where('is_active', 1)->count(),
+            'completed' => self::personalBase($userId)->where('status', 'completed')->count(),
+        ];
+    }
+
+    // ---------------------------------------------------------------
     // Writes
     // ---------------------------------------------------------------
 

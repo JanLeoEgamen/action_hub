@@ -34,8 +34,8 @@ class TaskCategoryController extends Controller implements HasMiddleware
                 })
                 ->addColumn('is_active', function ($category) {
                     return $category->is_active
-                        ? 'Active'
-                        : 'Inactive';
+                        ? '<span class="badge bg-success">Active</span>'
+                        : '<span class="badge bg-danger">Inactive</span>';
                 })
                 ->addColumn('action', function ($category) {
                     $buttons = '';
@@ -61,7 +61,7 @@ class TaskCategoryController extends Controller implements HasMiddleware
                     return $buttons ?: '—';
                 })
                 ->addIndexColumn()
-                ->rawColumns(['action'])
+                ->rawColumns(['action', 'is_active'])
                 ->make(true);
         }
 

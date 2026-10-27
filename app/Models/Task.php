@@ -290,6 +290,212 @@ class Task extends Model
     }
 
     // ---------------------------------------------------------------
+    // Dashboard
+    // ---------------------------------------------------------------
+
+    public static function getStatusCounts(?int $userId = null)
+    {
+        $query = DB::table('tasks')
+            ->select('status', DB::raw('count(*) as total'))
+            ->whereNull('deleted_at')
+            ->groupBy('status');
+
+        if ($userId !== null) {
+            $query->where('created_by', $userId);
+        }
+
+        return $query->get();
+    }
+
+    public static function getMonthlyCounts(?int $userId = null)
+    {
+        $query = DB::table('tasks')
+            ->select(DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"), DB::raw('count(*) as total'))
+            ->whereNull('deleted_at')
+            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month');
+
+        if ($userId !== null) {
+            $query->where('created_by', $userId);
+        }
+
+        return $query->get();
+    }
+
+    public static function getCategoryCounts(?int $userId = null)
+    {
+        $query = DB::table('tasks')
+            ->join('task_categories', 'task_categories.id', '=', 'tasks.category_id')
+            ->select('task_categories.name', DB::raw('count(*) as total'))
+            ->whereNull('tasks.deleted_at')
+            ->whereNull('task_categories.deleted_at')
+            ->groupBy('task_categories.name');
+
+        if ($userId !== null) {
+            $query->where('tasks.created_by', $userId);
+        }
+
+        return $query->get();
+    }
+
+    public static function getOverdueCount(?int $userId = null): int
+    {
+        $query = DB::table('tasks')
+            ->where('status', '!=', 'completed')
+            ->where('due_date', '<', now()->toDateString())
+            ->whereNull('deleted_at');
+
+        if ($userId !== null) {
+            $query->where('created_by', $userId);
+        }
+
+        return $query->count();
+    }
+
+    public static function getOnTimeCount(?int $userId = null): int
+    {
+        $query = DB::table('tasks')
+            ->where(function ($q) {
+                $q->where('status', 'completed')
+                    ->orWhere('due_date', '>=', now()->toDateString())
+                    ->orWhereNull('due_date');
+            })
+            ->whereNull('deleted_at');
+
+        if ($userId !== null) {
+            $query->where('created_by', $userId);
+        }
+
+        return $query->count();
+    }
+
+    public static function getTotals(?int $userId = null): array
+    {
+        $base = function () use ($userId) {
+            $query = DB::table('tasks')->whereNull('deleted_at');
+
+            if ($userId !== null) {
+                $query->where('created_by', $userId);
+            }
+
+            return $query;
+        };
+
+        return [
+            'tasks' => $base()->count(),
+            'pending' => $base()->where('status', 'pending')->count(),
+            'in_progress' => $base()->where('status', 'in_progress')->count(),
+            'completed' => $base()->where('status', 'completed')->count(),
+        ];
+    }
+
+    public static function getAssigneeCounts()
+    {
+        return DB::table('task_assignees')
+            ->join('users', 'users.id', '=', 'task_assignees.user_id')
+            ->join('tasks', 'tasks.id', '=', 'task_assignees.task_id')
+            ->select('users.first_name', 'users.last_name', DB::raw('count(*) as total'))
+            ->whereNull('task_assignees.deleted_at')
+            ->whereNull('users.deleted_at')
+            ->whereNull('tasks.deleted_at')
+            ->groupBy('users.id', 'users.first_name', 'users.last_name')
+            ->orderByDesc('total')
+            ->limit(10)
+            ->get();
+    }
+
+    public static function getOverdueTrend()
+    {
+        return DB::table('tasks')
+            ->select(DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"), DB::raw('count(*) as total'))
+            ->whereNull('deleted_at')
+            ->where('status', '!=', 'completed')
+            ->where('due_date', '<', now()->toDateString())
+            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+    }
+
+    // ---------------------------------------------------------------
+    // Dashboard - Personal (my overview)
+    // ---------------------------------------------------------------
+
+    protected static function personalBase(int $userId)
+    {
+        return DB::table('tasks')
+            ->whereNull('tasks.deleted_at')
+            ->where(function ($q) use ($userId) {
+                $q->where('created_by', $userId)
+                    ->orWhereIn('tasks.id', function ($sub) use ($userId) {
+                        $sub->select('task_id')
+                            ->from('task_assignees')
+                            ->where('user_id', $userId)
+                            ->where('is_active', 1)
+                            ->whereNull('task_assignees.deleted_at');
+                    });
+            });
+    }
+
+    public static function getPersonalStatusCounts(int $userId)
+    {
+        return self::personalBase($userId)
+            ->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->get();
+    }
+
+    public static function getPersonalMonthlyCounts(int $userId)
+    {
+        return self::personalBase($userId)
+            ->select(DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"), DB::raw('count(*) as total'))
+            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+    }
+
+    public static function getPersonalCategoryCounts(int $userId)
+    {
+        return self::personalBase($userId)
+            ->join('task_categories', 'task_categories.id', '=', 'tasks.category_id')
+            ->select('task_categories.name', DB::raw('count(*) as total'))
+            ->whereNull('task_categories.deleted_at')
+            ->groupBy('task_categories.name')
+            ->get();
+    }
+
+    public static function getPersonalOverdueCount(int $userId): int
+    {
+        return self::personalBase($userId)
+            ->where('status', '!=', 'completed')
+            ->where('due_date', '<', now()->toDateString())
+            ->count();
+    }
+
+    public static function getPersonalOnTimeCount(int $userId): int
+    {
+        return self::personalBase($userId)
+            ->where(function ($q) {
+                $q->where('status', 'completed')
+                    ->orWhere('due_date', '>=', now()->toDateString())
+                    ->orWhereNull('due_date');
+            })
+            ->count();
+    }
+
+    public static function getPersonalTotals(int $userId): array
+    {
+        return [
+            'tasks' => self::personalBase($userId)->count(),
+            'pending' => self::personalBase($userId)->where('status', 'pending')->count(),
+            'in_progress' => self::personalBase($userId)->where('status', 'in_progress')->count(),
+            'completed' => self::personalBase($userId)->where('status', 'completed')->count(),
+        ];
+    }
+
+    // ---------------------------------------------------------------
     // Writes
     // ---------------------------------------------------------------
 

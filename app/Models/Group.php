@@ -60,4 +60,23 @@ class Group extends Model
     {
         return DB::table('groups')->where('id', $id)->whereNull('deleted_at')->exists();
     }
+
+    public static function getGroupUserCounts()
+    {
+        return DB::table('groups')
+            ->join('departments', 'departments.id', '=', 'groups.department_id')
+            ->join('companies', 'companies.id', '=', 'departments.company_id')
+            ->leftJoin('users', 'users.group_id', '=', 'groups.id')
+            ->select('companies.company_name', 'departments.department_name', 'groups.group_name', DB::raw('count(DISTINCT users.id) as total'))
+            ->whereNull('groups.deleted_at')
+            ->whereNull('departments.deleted_at')
+            ->whereNull('companies.deleted_at')
+            ->groupBy('companies.id', 'departments.id', 'groups.id')
+            ->get();
+    }
+
+    public static function getCount(): int
+    {
+        return DB::table('groups')->whereNull('deleted_at')->count();
+    }
 }

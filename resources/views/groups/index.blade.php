@@ -15,6 +15,7 @@
                                 <th>Company</th>
                                 <th>Department</th>
                                 <th>Group Name</th>
+                                <th>Status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -54,9 +55,12 @@
                             <input type="text" name="group_name" id="group_name" class="form-control" required maxlength="255">
                         </div>
 
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" name="is_active" id="is_active" class="form-check-input" value="1" checked>
-                            <label for="is_active" class="form-check-label">Active</label>
+                        <div class="mb-3">
+                            <label for="is_active" class="form-label">Status</label>
+                            <select name="is_active" id="is_active" class="form-select" required>
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -86,6 +90,7 @@
                         { data: 'company_name' },
                         { data: 'department_name' },
                         { data: 'group_name' },
+                        { data: 'is_active' },
                         { data: 'action', orderable: false, searchable: false }
                     ]
                 });
@@ -94,7 +99,7 @@
                     $('#groupForm')[0].reset();
                     $('#group_id').val('');
                     $('#formErrors').addClass('d-none').empty();
-                    $('#is_active').prop('checked', true);
+                    $('#is_active').val('1');
                 }
 
                 $('#create-group').on('click', function () {
@@ -114,7 +119,7 @@
                             $('#group_id').val(data.id);
                             $('#department_id').val(data.department_id);
                             $('#group_name').val(data.group_name);
-                            $('#is_active').prop('checked', data.is_active == 1);
+                            $('#is_active').val(data.is_active);
                             
                             $('#modalTitle').text('Edit Group');
                             $('#saveGroup').text('Update');

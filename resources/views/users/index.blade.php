@@ -221,7 +221,7 @@
                         { data: 'last_name', name: 'last_name' },
                         { data: 'email', name: 'email' },
                         { data: 'roles', name: 'roles' },
-                        { data: 'group', name: 'group' },
+                        { data: 'group_name', name: 'group_name' },
                         { data: 'created_at', name: 'created_at' },
                         {
                             data: 'action',

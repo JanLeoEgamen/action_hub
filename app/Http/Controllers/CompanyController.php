@@ -26,6 +26,7 @@ class CompanyController extends Controller implements HasMiddleware
         if ($request->ajax()) {
             return DataTables::collection(Company::getAll())
                 ->addColumn('created_at', fn($company) => Carbon::parse($company->created_at)->format('Y-m-d'))
+                ->addColumn('company_description', fn($company) => $company->company_description)
                 ->addColumn('is_active', fn($company) => $company->is_active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>')
                 ->addColumn('action', function ($company) {
                     $buttons = '';

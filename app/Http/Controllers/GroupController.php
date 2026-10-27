@@ -27,6 +27,7 @@ class GroupController extends Controller implements HasMiddleware
         if ($request->ajax()) {
             return DataTables::collection(Group::getAll())
                 ->addColumn('created_at', fn($group) => Carbon::parse($group->created_at)->format('Y-m-d'))
+                ->addColumn('is_active', fn($group) => $group->is_active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>')
                 ->addColumn('action', function ($group) {
                     $buttons = '';
                     if (auth()->user()->can('edit groups')) {
@@ -38,7 +39,7 @@ class GroupController extends Controller implements HasMiddleware
                     return $buttons ?: '—';
                 })
                 ->addIndexColumn()
-                ->rawColumns(['action'])
+                ->rawColumns(['action', 'is_active'])
                 ->make(true);
         }
 

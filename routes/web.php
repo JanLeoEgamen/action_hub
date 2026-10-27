@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ProfileController;
@@ -16,9 +17,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/dashboard/data/my-overview', [DashboardController::class, 'myOverviewData'])->name('dashboard.data.my-overview');
+Route::get('/dashboard/data/project-overview', [DashboardController::class, 'projectOverviewData'])->name('dashboard.data.project-overview');
+Route::get('/dashboard/data/task-overview', [DashboardController::class, 'taskOverviewData'])->name('dashboard.data.task-overview');
+Route::get('/dashboard/data/organization-overview', [DashboardController::class, 'organizationOverviewData'])->name('dashboard.data.organization-overview');
 
 Route::middleware('auth')->group(function () {
 

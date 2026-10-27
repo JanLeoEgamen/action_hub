@@ -161,6 +161,65 @@ class Ticket extends Model
             ->exists();
     }
 
+    // ---------------------------------------------------------------
+    // Dashboard - Personal (my overview)
+    // ---------------------------------------------------------------
+
+    protected static function personalBase(int $userId)
+    {
+        return DB::table('tickets')
+            ->join('projects', 'projects.id', '=', 'tickets.project_id')
+            ->whereNull('tickets.deleted_at')
+            ->whereNull('projects.deleted_at')
+            ->where(function ($q) use ($userId) {
+                $q->where('projects.owner_id', $userId)
+                    ->orWhereIn('projects.id', function ($sub) use ($userId) {
+                        $sub->select('project_id')
+                            ->from('project_members')
+                            ->where('user_id', $userId)
+                            ->where('is_active', 1)
+                            ->whereNull('deleted_at');
+                    });
+            });
+    }
+
+    public static function getPersonalStatusCounts(int $userId)
+    {
+        return self::personalBase($userId)
+            ->select('tickets.status', DB::raw('count(*) as total'))
+            ->groupBy('tickets.status')
+            ->get();
+    }
+
+    public static function getPersonalMonthlyCounts(int $userId)
+    {
+        return self::personalBase($userId)
+            ->select(DB::raw("DATE_FORMAT(tickets.created_at, '%Y-%m') as month"), DB::raw('count(*) as total'))
+            ->where('tickets.created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+    }
+
+    public static function getPersonalPriorityCounts(int $userId)
+    {
+        return self::personalBase($userId)
+            ->select('tickets.priority', DB::raw('count(*) as total'))
+            ->groupBy('tickets.priority')
+            ->get();
+    }
+
+    public static function getPersonalTotals(int $userId): array
+    {
+        return [
+            'tickets' => self::personalBase($userId)->count(),
+            'open' => self::personalBase($userId)->where('tickets.status', 'open')->count(),
+            'in_progress' => self::personalBase($userId)->where('tickets.status', 'in_progress')->count(),
+            'resolved' => self::personalBase($userId)->where('tickets.status', 'resolved')->count(),
+            'closed' => self::personalBase($userId)->where('tickets.status', 'closed')->count(),
+        ];
+    }
+
     // write
     public static function createTicket(array $data, int $projectId)
     {

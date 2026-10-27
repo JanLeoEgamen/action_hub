@@ -161,12 +161,12 @@
                                     <option value="completed">Completed</option>
                                 </select>
                             </div>
-                            <div class="col-md-6 mb-3 d-flex align-items-end">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox"
-                                        name="is_active" id="is_active" value="1" checked>
-                                    <label class="form-check-label" for="is_active">Active</label>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="is_active" class="form-label">Status</label>
+                                <select name="is_active" id="is_active" class="form-select" required>
+                                    <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -351,7 +351,7 @@
                             $('#category_id_form').val(task.category_id);
                             $('#due_date').val(task.due_date);
                             $('#status_form').val(task.status);
-                            $('#is_active').prop('checked', !!task.is_active);
+                            $('#is_active').val(task.is_active ? '1' : '0');
                             $('#assignee_ids input[type="checkbox"]').prop('checked', false);
                             (task.assignee_ids || []).forEach(function (uid) {
                                 $('#assignee_ids input[type="checkbox"][value="' + uid + '"]').prop('checked', true);

@@ -169,4 +169,33 @@ class User extends Authenticatable
 
         return $query->exists();
     }
+
+    public static function getUsersPerDept()
+    {
+        return DB::table('users')
+            ->join('groups', 'groups.id', '=', 'users.group_id')
+            ->join('departments', 'departments.id', '=', 'groups.department_id')
+            ->select('departments.department_name', DB::raw('count(*) as total'))
+            ->whereNull('users.deleted_at')
+            ->whereNull('groups.deleted_at')
+            ->whereNull('departments.deleted_at')
+            ->whereNotNull('users.group_id')
+            ->groupBy('departments.id', 'departments.department_name')
+            ->get();
+    }
+
+    public static function getActiveCount(): int
+    {
+        return DB::table('users')->where('is_active', 1)->whereNull('deleted_at')->count();
+    }
+
+    public static function getInactiveCount(): int
+    {
+        return DB::table('users')->where('is_active', 0)->whereNull('deleted_at')->count();
+    }
+
+    public static function getCount(): int
+    {
+        return DB::table('users')->whereNull('deleted_at')->count();
+    }
 }

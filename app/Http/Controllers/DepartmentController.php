@@ -27,6 +27,8 @@ class DepartmentController extends Controller implements HasMiddleware
         if ($request->ajax()) {
             return DataTables::collection(Department::getAll())
                 ->addColumn('created_at', fn($dept) => Carbon::parse($dept->created_at)->format('Y-m-d'))
+                ->addColumn('department_description', fn($dept) => $dept->department_description)
+                ->addColumn('is_active', fn($dept) => $dept->is_active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>')
                 ->addColumn('action', function ($dept) {
                     $buttons = '';
                     if (auth()->user()->can('edit departments')) {
@@ -38,7 +40,7 @@ class DepartmentController extends Controller implements HasMiddleware
                     return $buttons ?: '—';
                 })
                 ->addIndexColumn()
-                ->rawColumns(['action'])
+                ->rawColumns(['action', 'is_active'])
                 ->make(true);
         }
 

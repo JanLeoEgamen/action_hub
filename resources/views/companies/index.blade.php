@@ -19,6 +19,7 @@
                             <tr>
                                 <th>No.</th>
                                 <th>Company Name</th>
+                                <th>Description</th>
                                 <th>Status</th>
                                 <th>Created At</th>
                                 <th>Action</th>
@@ -55,9 +56,12 @@
                             <textarea name="company_description" id="company_description" class="form-control" rows="3"></textarea>
                         </div>
 
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" name="is_active" id="is_active" class="form-check-input" value="1" checked>
-                            <label for="is_active" class="form-check-label">Active</label>
+                        <div class="mb-3">
+                            <label for="is_active" class="form-label">Status</label>
+                            <select name="is_active" id="is_active" class="form-select" required>
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -91,6 +95,7 @@
                     columns: [
                         { data: 'DT_RowIndex', orderable: false, searchable: false },
                         { data: 'company_name' },
+                        { data: 'company_description' },
                         { data: 'is_active' },
                         { data: 'created_at' },
                         { data: 'action', orderable: false, searchable: false }
@@ -101,7 +106,7 @@
                     $('#companyForm')[0].reset();
                     $('#company_id').val('');
                     $('#formErrors').addClass('d-none').empty();
-                    $('#is_active').prop('checked', true);
+                    $('#is_active').val('1');
                 }
 
                 $('#create-company').on('click', function () {
@@ -121,7 +126,7 @@
                             $('#company_id').val(data.id);
                             $('#company_name').val(data.company_name);
                             $('#company_description').val(data.company_description);
-                            $('#is_active').prop('checked', data.is_active == 1);
+                            $('#is_active').val(data.is_active);
                             
                             $('#modalTitle').text('Edit Company');
                             $('#saveCompany').text('Update');
