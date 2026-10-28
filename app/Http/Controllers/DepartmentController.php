@@ -16,8 +16,8 @@ class DepartmentController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('permission:view departments', only: ['index']),
-            new Middleware('permission:create departments', only: ['store']),
-            new Middleware('permission:edit departments', only: ['show', 'update']),
+            new Middleware('permission:create departments', only: ['create', 'store']),
+            new Middleware('permission:edit departments', only: ['edit', 'update']),
             new Middleware('permission:delete departments', only: ['destroy']),
         ];
     }
@@ -48,7 +48,15 @@ class DepartmentController extends Controller implements HasMiddleware
         return view('departments.index', compact('companies'));
     }
 
-    public function show($id)
+    // Return reference data for creating a department.
+    public function create()
+    {
+        return response()->json([
+            'companies' => Company::getAll(),
+        ]);
+    }
+
+    public function edit($id)
     {
         $dept = Department::findById($id);
         if (!$dept) return response()->json(['message' => 'Department not found.'], 404);

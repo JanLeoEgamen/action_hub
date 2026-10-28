@@ -17,8 +17,8 @@ class RoleController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('permission:view roles', only: ['index']),
-            new Middleware('permission:create roles', only: ['store']),
-            new Middleware('permission:edit roles', only: ['show', 'update']),
+            new Middleware('permission:create roles', only: ['create', 'store']),
+            new Middleware('permission:edit roles', only: ['edit', 'update']),
             new Middleware('permission:delete roles', only: ['destroy']),
         ];
     }
@@ -33,9 +33,33 @@ class RoleController extends Controller implements HasMiddleware
 
             return DataTables::collection($roles)
                 ->addColumn('permissions', function ($role) {
-                    return $role->permissions
-                        ->pluck('name')
-                        ->implode(', ');
+                    $resourceTitles = [
+                        'companies' => 'Companies',
+                        'departments' => 'Departments',
+                        'groups' => 'Groups',
+                        'users' => 'Users',
+                        'roles' => 'Roles',
+                        'task categories' => 'Task Categories',
+                        'projects' => 'Projects',
+                        'tasks' => 'Tasks',
+                        'tickets' => 'Tickets',
+                    ];
+
+                    $grouped = $role->permissions->groupBy(function ($p) {
+                        $parts = explode(' ', $p->name, 2);
+                        return $parts[1] ?? $parts[0];
+                    });
+
+                    $badges = $grouped->map(function ($resourcePerms, $resource) use ($resourceTitles) {
+                        $label = $resourceTitles[$resource] ?? ucfirst($resource);
+                        $count = $resourcePerms->count();
+
+                        return '<span class="badge bg-light text-dark border me-1 mb-1"'
+                            . ' title="' . $count . ' permissions for ' . $label . '"'
+                            . '>' . $label . '</span>';
+                    })->implode('');
+
+                    return $badges ?: '<span class="text-muted">—</span>';
                 })
                 ->addColumn('created_at', function ($role) {
                     return $role->created_at
@@ -66,17 +90,29 @@ class RoleController extends Controller implements HasMiddleware
                     return $buttons ?: '—';
                 })
                 ->addIndexColumn()
-                ->rawColumns(['action'])
+                ->rawColumns(['action', 'permissions'])
                 ->make(true);
         }
 
-        $permissions = Permission::orderBy('name', 'ASC')->get();
+        $groupedPermissions = Permission::orderBy('name', 'ASC')->get()
+            ->groupBy(function ($permission) {
+                $parts = explode(' ', $permission->name, 2);
+                return $parts[1] ?? $parts[0];
+            });
 
-        return view('roles.index', compact('permissions'));
+        return view('roles.index', compact('groupedPermissions'));
+    }
+
+    // Return reference data for creating a role.
+    public function create()
+    {
+        return response()->json([
+            'permissions' => Permission::orderBy('name', 'ASC')->get(),
+        ]);
     }
 
     // Return role data and assigned permissions for editing
-    public function show($id)
+    public function edit($id)
     {
         $role = Role::with('permissions')->find($id);
 

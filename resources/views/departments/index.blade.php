@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <x-page-header title="Departments" action-label="Create" action-id="create-department" permission="create departments" />
     </x-slot>
@@ -27,43 +27,39 @@
         </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="departmentModal" tabindex="-1" aria-hidden="true">
+    <!-- Create Modal -->
+    <div class="modal fade" id="create-department-modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form id="departmentForm">
+                <form id="create-department-form">
                     @csrf
-                    <input type="hidden" id="department_id">
+                    <input type="hidden" id="create-department_id">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle">Create Department</h5>
+                        <h5 class="modal-title" id="createModalTitle">Create Department</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div id="formErrors" class="alert alert-danger d-none"></div>
-                        
+                        <div id="create-formErrors" class="alert alert-danger d-none"></div>
                         <div class="mb-3">
                             <label class="form-label">Company</label>
-                            <select name="company_id" id="company_id" class="form-select" required>
+                            <select name="company_id" id="create-company_id" class="form-select" required>
                                 <option value="">Select Company</option>
                                 @foreach($companies as $company)
                                     <option value="{{ $company->id }}">{{ $company->company_name }}</option>
                                 @endforeach
                             </select>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">Department Name</label>
-                            <input type="text" name="department_name" id="department_name" class="form-control" required maxlength="255">
+                            <input type="text" name="department_name" id="create-department_name" class="form-control" required maxlength="255">
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">Description</label>
-                            <textarea name="department_description" id="department_description" class="form-control" rows="3"></textarea>
+                            <textarea name="department_description" id="create-department_description" class="form-control" rows="3"></textarea>
                         </div>
-
                         <div class="mb-3">
-                            <label for="is_active" class="form-label">Status</label>
-                            <select name="is_active" id="is_active" class="form-select" required>
+                            <label for="create-is_active" class="form-label">Status</label>
+                            <select name="is_active" id="create-is_active" class="form-select" required>
                                 <option value="1">Active</option>
                                 <option value="0">Inactive</option>
                             </select>
@@ -71,19 +67,66 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" id="saveDepartment" class="btn btn-primary">Create</button>
+                        <button type="submit" id="saveCreateDepartment" class="btn btn-primary">Create</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- Edit Modal -->
+    <div class="modal fade" id="edit-department-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="edit-department-form">
+                    @csrf
+                    <input type="hidden" id="edit-department_id">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalTitle">Edit Department</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="edit-formErrors" class="alert alert-danger d-none"></div>
+                        <div class="mb-3">
+                            <label class="form-label">Company</label>
+                            <select name="company_id" id="edit-company_id" class="form-select" required>
+                                <option value="">Select Company</option>
+                                @foreach($companies as $company)
+                                    <option value="{{ $company->id }}">{{ $company->company_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Department Name</label>
+                            <input type="text" name="department_name" id="edit-department_name" class="form-control" required maxlength="255">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="department_description" id="edit-department_description" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-is_active" class="form-label">Status</label>
+                            <select name="is_active" id="edit-is_active" class="form-select" required>
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="saveEditDepartment" class="btn btn-primary">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <x-delete-confirmation-modal id="deleteDepartmentModal" title="Confirm Delete" message="Are you sure you want to delete this department?" confirm-button-id="confirmDeleteDepartment" confirm-label="Delete" />
 
     @push('scripts')
         <script>
             $(document).ready(function () {
-                const modal = new bootstrap.Modal(document.getElementById('departmentModal'));
+                const createModal = new bootstrap.Modal(document.getElementById('create-department-modal'));
+                const editModal = new bootstrap.Modal(document.getElementById('edit-department-modal'));
                 const deleteModal = new bootstrap.Modal(document.getElementById('deleteDepartmentModal'));
                 let deleteId = null;
 
@@ -102,55 +145,53 @@
                     ]
                 });
 
-                function resetForm() {
-                    $('#departmentForm')[0].reset();
-                    $('#department_id').val('');
-                    $('#formErrors').addClass('d-none').empty();
-                    $('#is_active').val('1');
+                function resetCreateForm() {
+                    $('#create-department-form')[0].reset();
+                    $('#create-department_id').val('');
+                    $('#create-formErrors').addClass('d-none').empty();
+                    $('#create-is_active').val('1');
+                }
+
+                function resetEditForm() {
+                    $('#edit-department-form')[0].reset();
+                    $('#edit-department_id').val('');
+                    $('#edit-formErrors').addClass('d-none').empty();
+                    $('#edit-is_active').val('1');
                 }
 
                 $('#create-department').on('click', function () {
-                    resetForm();
-                    $('#modalTitle').text('Create Department');
-                    $('#saveDepartment').text('Create');
-                    modal.show();
+                    resetCreateForm();
+                    createModal.show();
                 });
 
                 $('.datatable').on('click', '.edit-department', function () {
                     const id = $(this).data('id');
-                    resetForm();
+                    resetEditForm();
                     $.ajax({
-                        url: `/departments/${id}/data`,
+                        url: `/departments/${id}/edit`,
                         method: 'GET',
                         success: function (data) {
-                            $('#department_id').val(data.id);
-                            $('#company_id').val(data.company_id);
-                            $('#department_name').val(data.department_name);
-                            $('#department_description').val(data.department_description);
-                            $('#is_active').val(data.is_active);
-                            
-                            $('#modalTitle').text('Edit Department');
-                            $('#saveDepartment').text('Update');
-                            modal.show();
+                            $('#edit-department_id').val(data.id);
+                            $('#edit-company_id').val(data.company_id);
+                            $('#edit-department_name').val(data.department_name);
+                            $('#edit-department_description').val(data.department_description);
+                            $('#edit-is_active').val(data.is_active);
+                            editModal.show();
                         }
                     });
                 });
 
-                $('#departmentForm').on('submit', function (e) {
+                $('#create-department-form').on('submit', function (e) {
                     e.preventDefault();
-                    const id = $('#department_id').val();
-                    const url = id ? `/departments/${id}` : '{{ route("departments.store") }}';
-                    const method = id ? 'PUT' : 'POST';
-
-                    $('#formErrors').addClass('d-none').empty();
-                    $('#saveDepartment').prop('disabled', true).text('Saving...');
+                    $('#create-formErrors').addClass('d-none').empty();
+                    $('#saveCreateDepartment').prop('disabled', true).text('Saving...');
 
                     $.ajax({
-                        url: url,
-                        method: method,
+                        url: '{{ route("departments.store") }}',
+                        method: 'POST',
                         data: $(this).serialize(),
                         success: function (response) {
-                            modal.hide();
+                            createModal.hide();
                             table.ajax.reload(null, false);
                             $('#successMessage').text(response.message).removeClass('d-none');
                             setTimeout(() => $('#successMessage').addClass('d-none'), 3000);
@@ -159,11 +200,40 @@
                             if (xhr.status === 422) {
                                 let messages = '';
                                 Object.values(xhr.responseJSON.errors).forEach(errs => errs.forEach(msg => messages += `<div>${msg}</div>`));
-                                $('#formErrors').html(messages).removeClass('d-none');
+                                $('#create-formErrors').html(messages).removeClass('d-none');
                             }
                         },
                         complete: function () {
-                            $('#saveDepartment').prop('disabled', false).text(id ? 'Update' : 'Create');
+                            $('#saveCreateDepartment').prop('disabled', false).text('Create');
+                        }
+                    });
+                });
+
+                $('#edit-department-form').on('submit', function (e) {
+                    e.preventDefault();
+                    const id = $('#edit-department_id').val();
+                    $('#edit-formErrors').addClass('d-none').empty();
+                    $('#saveEditDepartment').prop('disabled', true).text('Saving...');
+
+                    $.ajax({
+                        url: `/departments/${id}`,
+                        method: 'PUT',
+                        data: $(this).serialize(),
+                        success: function (response) {
+                            editModal.hide();
+                            table.ajax.reload(null, false);
+                            $('#successMessage').text(response.message).removeClass('d-none');
+                            setTimeout(() => $('#successMessage').addClass('d-none'), 3000);
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                let messages = '';
+                                Object.values(xhr.responseJSON.errors).forEach(errs => errs.forEach(msg => messages += `<div>${msg}</div>`));
+                                $('#edit-formErrors').html(messages).removeClass('d-none');
+                            }
+                        },
+                        complete: function () {
+                            $('#saveEditDepartment').prop('disabled', false).text('Update');
                         }
                     });
                 });
@@ -194,5 +264,4 @@
                 });
             });
         </script>
-    @endpush
-</x-app-layout>
+    @endpush</x-app-layout>

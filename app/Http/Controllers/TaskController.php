@@ -13,9 +13,9 @@ class TaskController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:view tasks', only: ['index', 'board', 'show']),
-            new Middleware('permission:create tasks', only: ['store']),
-            new Middleware('permission:edit tasks', only: ['show', 'update']),
+            new Middleware('permission:view tasks', only: ['index', 'board']),
+            new Middleware('permission:create tasks', only: ['create', 'store']),
+            new Middleware('permission:edit tasks', only: ['edit', 'update']),
             new Middleware('permission:delete tasks', only: ['destroy']),
         ];
     }
@@ -49,13 +49,15 @@ class TaskController extends Controller implements HasMiddleware
         ]);
     }
 
-    // Return one task for the edit modal
-    public function show($id = null)
+    // Return reference data for creating a task.
+    public function create()
     {
-        if (! $id) {
-            return response()->json([]);
-        }
+        return response()->json([]);
+    }
 
+    // Return one task for the edit modal
+    public function edit($id)
+    {
         $task = Task::getTaskForEdit($id);
 
         if (! $task) {

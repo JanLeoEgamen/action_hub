@@ -34,9 +34,7 @@ class DashboardController extends Controller implements HasMiddleware
     {
         $userId = auth()->id();
 
-        // ---------------------------------------------------------------
-        // Tasks (personal: created by or assigned to the user)
-        // ---------------------------------------------------------------
+        // own user
         $taskStatusRows = Task::getPersonalStatusCounts($userId);
         $taskMonthRows = Task::getPersonalMonthlyCounts($userId);
         $taskCategoryRows = Task::getPersonalCategoryCounts($userId);

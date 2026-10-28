@@ -33,9 +33,10 @@ Route::middleware('auth')->group(function () {
 
     // Users
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::get('/users/{id}/data', [UserController::class, 'show'])
-        ->whereNumber('id')->name('users.show');
+    Route::get('/users/{id}/edit', [UserController::class, 'edit'])
+        ->whereNumber('id')->name('users.edit');
     Route::put('/users/{id}', [UserController::class, 'update'])
         ->whereNumber('id')->name('users.update');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])
@@ -43,9 +44,10 @@ Route::middleware('auth')->group(function () {
     
     // Roles
     Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+    Route::get('/roles/create', [RoleController::class, 'create'])->name('roles.create');
     Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
-    Route::get('/roles/{id}/data', [RoleController::class, 'show'])
-        ->whereNumber('id')->name('roles.show');
+    Route::get('/roles/{id}/edit', [RoleController::class, 'edit'])
+        ->whereNumber('id')->name('roles.edit');
     Route::put('/roles/{id}', [RoleController::class, 'update'])
         ->whereNumber('id')->name('roles.update');
     Route::delete('/roles/{id}', [RoleController::class, 'destroy'])
@@ -54,9 +56,10 @@ Route::middleware('auth')->group(function () {
 
     // Companies
     Route::get('/companies', [CompanyController::class, 'index'])->name('companies.index');
+    Route::get('/companies/create', [CompanyController::class, 'create'])->name('companies.create');
     Route::post('/companies', [CompanyController::class, 'store'])->name('companies.store');
-    Route::get('/companies/{id}/data', [CompanyController::class, 'show'])
-        ->whereNumber('id')->name('companies.show');
+    Route::get('/companies/{id}/edit', [CompanyController::class, 'edit'])
+        ->whereNumber('id')->name('companies.edit');
     Route::put('/companies/{id}', [CompanyController::class, 'update'])
         ->whereNumber('id')->name('companies.update');
     Route::delete('/companies/{id}', [CompanyController::class, 'destroy'])
@@ -64,9 +67,10 @@ Route::middleware('auth')->group(function () {
 
     // Departments
     Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');
+    Route::get('/departments/create', [DepartmentController::class, 'create'])->name('departments.create');
     Route::post('/departments', [DepartmentController::class, 'store'])->name('departments.store');
-    Route::get('/departments/{id}/data', [DepartmentController::class, 'show'])
-        ->whereNumber('id')->name('departments.show');
+    Route::get('/departments/{id}/edit', [DepartmentController::class, 'edit'])
+        ->whereNumber('id')->name('departments.edit');
     Route::put('/departments/{id}', [DepartmentController::class, 'update'])
         ->whereNumber('id')->name('departments.update');
     Route::delete('/departments/{id}', [DepartmentController::class, 'destroy'])
@@ -74,9 +78,10 @@ Route::middleware('auth')->group(function () {
 
     // Groups
     Route::get('/groups', [GroupController::class, 'index'])->name('groups.index');
+    Route::get('/groups/create', [GroupController::class, 'create'])->name('groups.create');
     Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
-    Route::get('/groups/{id}/data', [GroupController::class, 'show'])
-        ->whereNumber('id')->name('groups.show');
+    Route::get('/groups/{id}/edit', [GroupController::class, 'edit'])
+        ->whereNumber('id')->name('groups.edit');
     Route::put('/groups/{id}', [GroupController::class, 'update'])
         ->whereNumber('id')->name('groups.update');
     Route::delete('/groups/{id}', [GroupController::class, 'destroy'])
@@ -84,9 +89,10 @@ Route::middleware('auth')->group(function () {
 
     // TaskCategory
     Route::get('/task-categories', [TaskCategoryController::class, 'index'])->name('task-categories.index');
+    Route::get('/task-categories/create', [TaskCategoryController::class, 'create'])->name('task-categories.create');
     Route::post('/task-categories', [TaskCategoryController::class, 'store'])->name('task-categories.store');
-    Route::get('/task-categories/{id}/data', [TaskCategoryController::class, 'show'])
-        ->whereNumber('id')->name('task-categories.show');
+    Route::get('/task-categories/{id}/edit', [TaskCategoryController::class, 'edit'])
+        ->whereNumber('id')->name('task-categories.edit');
     Route::put('/task-categories/{id}', [TaskCategoryController::class, 'update'])
         ->whereNumber('id')->name('task-categories.update');
     Route::delete('/task-categories/{id}', [TaskCategoryController::class, 'destroy'])
@@ -95,9 +101,10 @@ Route::middleware('auth')->group(function () {
     // Tasks
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
     Route::get('/tasks/board', [TaskController::class, 'board'])->name('tasks.board');
+    Route::get('/tasks/create', [TaskController::class, 'create'])->name('tasks.create');
     Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
-    Route::get('/tasks/{id}/data', [TaskController::class, 'show'])
-        ->whereNumber('id')->name('tasks.show');
+    Route::get('/tasks/{id}/edit', [TaskController::class, 'edit'])
+        ->whereNumber('id')->name('tasks.edit');
     Route::put('/tasks/{id}', [TaskController::class, 'update'])
         ->whereNumber('id')->name('tasks.update');
     Route::patch('/tasks/{id}/status', [TaskController::class, 'updateStatus'])
@@ -109,6 +116,7 @@ Route::middleware('auth')->group(function () {
     // Project List
     Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::get('/projects/list', [ProjectController::class, 'list'])->name('projects.list');
+    Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
     Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
 
     // Project Scope ticket
@@ -116,20 +124,22 @@ Route::middleware('auth')->group(function () {
         ->whereNumber('projectId')->name('projects.tickets');
     Route::get('/projects/{projectId}/tickets/board', [TicketController::class, 'board'])
         ->whereNumber('projectId')->name('projects.tickets.board');
+    Route::get('/projects/{projectId}/tickets/create', [TicketController::class, 'create'])
+        ->whereNumber('projectId')->name('projects.tickets.create');
     Route::post('/projects/{projectId}/tickets', [TicketController::class, 'store'])
     ->whereNumber('projectId')->name('projects.tickets.store');
 
     // Project
-    Route::get('/projects/{id}/data', [ProjectController::class, 'show'])
-        ->whereNumber('id')->name('projects.show');
+    Route::get('/projects/{id}/edit', [ProjectController::class, 'edit'])
+        ->whereNumber('id')->name('projects.edit');
     Route::put('/projects/{id}', [ProjectController::class, 'update'])
         ->whereNumber('id')->name('projects.update');
     Route::delete('/projects/{id}', [ProjectController::class, 'destroy'])
         ->whereNumber('id')->name('projects.destroy');
 
     // Tickets
-    Route::get('/tickets/{id}/data', [TicketController::class, 'show'])
-        ->whereNumber('id')->name('tickets.show');
+    Route::get('/tickets/{id}/edit', [TicketController::class, 'edit'])
+        ->whereNumber('id')->name('tickets.edit');
     Route::put('/tickets/{id}', [TicketController::class, 'update'])
         ->whereNumber('id')->name('tickets.update');
     Route::patch('/tickets/{id}/status', [TicketController::class, 'updateStatus'])

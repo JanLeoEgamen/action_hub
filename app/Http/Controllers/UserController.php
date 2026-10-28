@@ -18,8 +18,8 @@ class UserController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('permission:view users', only: ['index']),
-            new Middleware('permission:create users', only: ['store']),
-            new Middleware('permission:edit users', only: ['show', 'update']),
+            new Middleware('permission:create users', only: ['create', 'store']),
+            new Middleware('permission:edit users', only: ['edit', 'update']),
             new Middleware('permission:delete users', only: ['destroy']),
         ];
     }
@@ -67,8 +67,17 @@ class UserController extends Controller implements HasMiddleware
         return view('users.index', compact('roles', 'groups'));
     }
 
+    // Return reference data for creating a user.
+    public function create()
+    {
+        return response()->json([
+            'roles' => Role::orderBy('name', 'ASC')->get(),
+            'groups' => Group::getAll(),
+        ]);
+    }
+
     // Return user data for editing.
-    public function show($id)
+    public function edit($id)
     {
         $user = User::findById($id);
 

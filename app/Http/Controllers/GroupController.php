@@ -16,8 +16,8 @@ class GroupController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('permission:view groups', only: ['index']),
-            new Middleware('permission:create groups', only: ['store']),
-            new Middleware('permission:edit groups', only: ['show', 'update']),
+            new Middleware('permission:create groups', only: ['create', 'store']),
+            new Middleware('permission:edit groups', only: ['edit', 'update']),
             new Middleware('permission:delete groups', only: ['destroy']),
         ];
     }
@@ -47,7 +47,15 @@ class GroupController extends Controller implements HasMiddleware
         return view('groups.index', compact('departments'));
     }
 
-    public function show($id)
+    // Return reference data for creating a group.
+    public function create()
+    {
+        return response()->json([
+            'departments' => Department::getAll(),
+        ]);
+    }
+
+    public function edit($id)
     {
         $group = Group::findById($id);
         if (!$group) return response()->json(['message' => 'Group not found.'], 404);

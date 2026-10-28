@@ -15,8 +15,8 @@ class CompanyController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('permission:view companies', only: ['index']),
-            new Middleware('permission:create companies', only: ['store']),
-            new Middleware('permission:edit companies', only: ['show', 'update']),
+            new Middleware('permission:create companies', only: ['create', 'store']),
+            new Middleware('permission:edit companies', only: ['edit', 'update']),
             new Middleware('permission:delete companies', only: ['destroy']),
         ];
     }
@@ -46,7 +46,13 @@ class CompanyController extends Controller implements HasMiddleware
         return view('companies.index');
     }
 
-    public function show($id)
+    // Return reference data for creating a company.
+    public function create()
+    {
+        return response()->json([]);
+    }
+
+    public function edit($id)
     {
         $company = Company::findById($id);
         if (!$company) return response()->json(['message' => 'Company not found.'], 404);

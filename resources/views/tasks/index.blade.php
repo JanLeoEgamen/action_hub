@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <x-page-header
             title="Tasks"
@@ -86,40 +86,40 @@
         </div>
     </div>
 
-    <!-- Create/Edit Modal -->
-    <div class="modal fade" id="taskModal" tabindex="-1"
-        aria-labelledby="taskModalTitle" aria-hidden="true">
+    <!-- Create Modal -->
+    <div class="modal fade" id="create-task-modal" tabindex="-1"
+        aria-labelledby="createTaskModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form id="taskForm">
+                <form id="create-task-form">
                     @csrf
-                    <input type="hidden" id="task_id">
+                    <input type="hidden" id="create-task_id">
 
                     <div class="modal-header">
-                        <h5 class="modal-title" id="taskModalTitle">Create Task</h5>
+                        <h5 class="modal-title" id="createTaskModalTitle">Create Task</h5>
                         <button type="button" class="btn-close"
                             data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
                     <div class="modal-body">
-                        <div id="formErrors" class="alert alert-danger d-none"></div>
+                        <div id="create-formErrors" class="alert alert-danger d-none"></div>
 
                         <div class="mb-3">
-                            <label for="title" class="form-label">Title</label>
-                            <input type="text" name="title" id="title"
+                            <label for="create-title" class="form-label">Title</label>
+                            <input type="text" name="title" id="create-title"
                                 class="form-control" required minlength="3" maxlength="255">
                         </div>
 
                         <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea name="description" id="description"
+                            <label for="create-description" class="form-label">Description</label>
+                            <textarea name="description" id="create-description"
                                 class="form-control" rows="3"></textarea>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="category_id_form" class="form-label">Category</label>
-                                <select name="category_id" id="category_id_form"
+                                <label for="create-category_id_form" class="form-label">Category</label>
+                                <select name="category_id" id="create-category_id_form"
                                     class="form-select" required>
                                     <option value="">Select category</option>
                                     @foreach ($categories as $category)
@@ -128,22 +128,23 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="due_date" class="form-label">Due Date</label>
-                                <input type="date" name="due_date" id="due_date" class="form-control">
+                                <label for="create-due_date" class="form-label">Due Date</label>
+                                <input type="date" name="due_date" id="create-due_date" class="form-control">
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label d-block">Assignees</label>
-                            <div id="assignee_ids" class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+                            <div id="create-assignee_ids" class="border rounded p-2"
+                                style="max-height: 200px; overflow-y: auto;">
                                 @foreach ($users as $user)
                                     <div class="form-check">
                                         <input class="form-check-input assignee-checkbox"
                                             type="checkbox"
                                             name="assignee_ids[]"
                                             value="{{ $user->id }}"
-                                            id="assignee_{{ $user->id }}">
-                                        <label class="form-check-label" for="assignee_{{ $user->id }}">
+                                            id="create-assignee_{{ $user->id }}">
+                                        <label class="form-check-label" for="create-assignee_{{ $user->id }}">
                                             {{ trim($user->first_name . ' ' . $user->last_name) }}
                                         </label>
                                     </div>
@@ -153,8 +154,8 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="status_form" class="form-label">Status</label>
-                                <select name="status" id="status_form"
+                                <label for="create-status_form" class="form-label">Status</label>
+                                <select name="status" id="create-status_form"
                                     class="form-select" required>
                                     <option value="pending">Pending</option>
                                     <option value="in_progress">In Progress</option>
@@ -162,8 +163,8 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="is_active" class="form-label">Status</label>
-                                <select name="is_active" id="is_active" class="form-select" required>
+                                <label for="create-is_active" class="form-label">Status</label>
+                                <select name="is_active" id="create-is_active" class="form-select" required>
                                     <option value="1">Active</option>
                                     <option value="0">Inactive</option>
                                 </select>
@@ -174,7 +175,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary"
                             data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" id="saveTask"
+                        <button type="submit" id="saveCreateTask"
                             class="btn btn-primary">Save</button>
                     </div>
                 </form>
@@ -182,6 +183,102 @@
         </div>
     </div>
 
+    <!-- Edit Modal -->
+    <div class="modal fade" id="edit-task-modal" tabindex="-1"
+        aria-labelledby="editTaskModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="edit-task-form">
+                    @csrf
+                    <input type="hidden" id="edit-task_id">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editTaskModalTitle">Edit Task</h5>
+                        <button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div id="edit-formErrors" class="alert alert-danger d-none"></div>
+
+                        <div class="mb-3">
+                            <label for="edit-title" class="form-label">Title</label>
+                            <input type="text" name="title" id="edit-title"
+                                class="form-control" required minlength="3" maxlength="255">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="edit-description" class="form-label">Description</label>
+                            <textarea name="description" id="edit-description"
+                                class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="edit-category_id_form" class="form-label">Category</label>
+                                <select name="category_id" id="edit-category_id_form"
+                                    class="form-select" required>
+                                    <option value="">Select category</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit-due_date" class="form-label">Due Date</label>
+                                <input type="date" name="due_date" id="edit-due_date" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label d-block">Assignees</label>
+                            <div id="edit-assignee_ids" class="border rounded p-2"
+                                style="max-height: 200px; overflow-y: auto;">
+                                @foreach ($users as $user)
+                                    <div class="form-check">
+                                        <input class="form-check-input assignee-checkbox"
+                                            type="checkbox"
+                                            name="assignee_ids[]"
+                                            value="{{ $user->id }}"
+                                            id="edit-assignee_{{ $user->id }}">
+                                        <label class="form-check-label" for="edit-assignee_{{ $user->id }}">
+                                            {{ trim($user->first_name . ' ' . $user->last_name) }}
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="edit-status_form" class="form-label">Status</label>
+                                <select name="status" id="edit-status_form"
+                                    class="form-select" required>
+                                    <option value="pending">Pending</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit-is_active" class="form-label">Status</label>
+                                <select name="is_active" id="edit-is_active" class="form-select" required>
+                                    <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="saveEditTask"
+                            class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <!-- Delete Confirmation Modal -->
     <x-delete-confirmation-modal
         id="deleteTaskModal"
@@ -195,8 +292,8 @@
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
         <script>
             $(document).ready(function () {
-                const taskModalElement = document.getElementById('taskModal');
-                const taskModal = new bootstrap.Modal(taskModalElement);
+                const createModal = new bootstrap.Modal(document.getElementById('create-task-modal'));
+                const editModal = new bootstrap.Modal(document.getElementById('edit-task-modal'));
 
                 const STATUS_LABELS = {
                     pending: 'Pending',
@@ -263,69 +360,54 @@
                     };
 
                     tasks.forEach(function (task) {
-                        if (groups[task.status]) {
+                        if (groups.hasOwnProperty(task.status)) {
                             groups[task.status].push(task);
                         }
                     });
 
                     Object.keys(groups).forEach(function (status) {
-                        const $col = $('.kanban-column[data-status="' + status + '"]');
+                        const $col = $(`.kanban-column[data-status="${status}"]`);
                         $col.empty();
-                        $('[data-count="' + status + '"]').text(groups[status].length);
+
+                        const countEl = $col.closest('.card').find('.badge[data-count]');
+                        if (countEl.length) {
+                            countEl.text(groups[status].length);
+                        }
 
                         groups[status].forEach(function (task) {
-                            $col.append(buildCard(task));
+                            const $card = $(`
+                                <div class="card mb-2 task-card" data-id="${task.id}">
+                                    <div class="card-body">
+                                        <h6 class="card-title">${escapeHtml(task.title)}</h6>
+                                        <p class="card-text text-muted small">${escapeHtml(task.description || '')}</p>
+                                        ${task.due_date ? `<small class="text-muted">Due: ${escapeHtml(task.due_date)}</small><br>` : ''}
+                                        <button type="button" class="btn btn-sm btn-success edit-task" data-id="${task.id}">Edit</button>
+                                        <button type="button" class="btn btn-sm btn-danger delete-task" data-id="${task.id}">Delete</button>
+                                    </div>
+                                </div>
+                            `);
+                            $col.append($card);
                         });
                     });
                 }
 
-                // cards
-                function buildCard(task) {
-                    const assignees = task.assignees && task.assignees.length
-                        ? task.assignees.map(function (a) { return escapeHtml(a.name); }).join(', ')
-                        : '—';
-
-                    const dueClass = isOverdue(task) ? 'text-danger fw-bold' : 'text-muted';
-                    const dueText  = task.due_date ? task.due_date : 'No due date';
-
-                    return `
-                        <div class="card mb-2 task-card" data-id="${task.id}">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <h6 class="mb-1">${escapeHtml(task.title)}</h6>
-                                    <span class="badge bg-secondary">${escapeHtml(STATUS_LABELS[task.status] || task.status)}</span>
-                                </div>
-                                <div class="small text-muted mb-1">${escapeHtml(task.category || '—')}</div>
-                                <div class="small mb-1"><strong>Created by:</strong> ${escapeHtml(task.creator || '—')}</div>
-                                <div class="small mb-1"><strong>Assignees:</strong> ${assignees}</div>
-                                <div class="small mb-2 ${dueClass}"><strong>Due:</strong> ${escapeHtml(dueText)}</div>
-                                <div class="text-end">${task.action}</div>
-                            </div>
-                        </div>
-                    `;
+                function resetCreateForm() {
+                    $('#create-task-form')[0].reset();
+                    $('#create-task_id').val('');
+                    $('#create-assignee_ids input[type="checkbox"]').prop('checked', false);
+                    $('#create-formErrors').addClass('d-none').empty();
                 }
 
-                // filters
-                let searchDebounce;
-                $('#filter, #category_id, #status, #overdue').on('change', loadBoard);
-                $('#search').on('input', function () {
-                    clearTimeout(searchDebounce);
-                    searchDebounce = setTimeout(loadBoard, 300);
-                });
-
-                // reset and clear form
-                function resetForm() {
-                    $('#taskForm')[0].reset();
-                    $('#task_id').val('');
-                    $('#assignee_ids input[type="checkbox"]').prop('checked', false);
-                    $('#formErrors').addClass('d-none').empty();
+                function resetEditForm() {
+                    $('#edit-task-form')[0].reset();
+                    $('#edit-task_id').val('');
+                    $('#edit-assignee_ids input[type="checkbox"]').prop('checked', false);
+                    $('#edit-formErrors').addClass('d-none').empty();
                 }
 
                 $('#create-task').on('click', function () {
-                    resetForm();
-                    $('#taskModalTitle').text('Create Task');
-                    $('#saveTask').text('Create');
-                    taskModal.show();
+                    resetCreateForm();
+                    createModal.show();
                 });
 
                 $('#kanban-board').on('click', '.edit-task', function (e) {
@@ -339,26 +421,24 @@
                     button.text('Loading...');
 
                     const id = button.data('id');
-                    resetForm();
+                    resetEditForm();
 
                     $.ajax({
-                        url: `/tasks/${id}/data`,
+                        url: `/tasks/${id}/edit`,
                         method: 'GET',
                         success: function (task) {
-                            $('#task_id').val(task.id);
-                            $('#title').val(task.title);
-                            $('#description').val(task.description);
-                            $('#category_id_form').val(task.category_id);
-                            $('#due_date').val(task.due_date);
-                            $('#status_form').val(task.status);
-                            $('#is_active').val(task.is_active ? '1' : '0');
-                            $('#assignee_ids input[type="checkbox"]').prop('checked', false);
+                            $('#edit-task_id').val(task.id);
+                            $('#edit-title').val(task.title);
+                            $('#edit-description').val(task.description);
+                            $('#edit-category_id_form').val(task.category_id);
+                            $('#edit-due_date').val(task.due_date);
+                            $('#edit-status_form').val(task.status);
+                            $('#edit-is_active').val(task.is_active ? '1' : '0');
+                            $('#edit-assignee_ids input[type="checkbox"]').prop('checked', false);
                             (task.assignee_ids || []).forEach(function (uid) {
-                                $('#assignee_ids input[type="checkbox"][value="' + uid + '"]').prop('checked', true);
+                                $('#edit-assignee_ids input[type="checkbox"][value="' + uid + '"]').prop('checked', true);
                             });
-                            $('#taskModalTitle').text('Edit Task');
-                            $('#saveTask').text('Update');
-                            taskModal.show();
+                            editModal.show();
                         },
                         error: function (xhr) {
                             alert(xhr.responseJSON?.message || 'Unable to load task.');
@@ -371,43 +451,72 @@
                     });
                 });
 
-                $('#taskForm').on('submit', function (e) {
+                $('#create-task-form').on('submit', function (e) {
                     e.preventDefault();
 
-                    const id = $('#task_id').val();
-                    const url = id ? `/tasks/${id}` : '{{ route("tasks.store") }}';
-                    const method = id ? 'PUT' : 'POST';
-
-                    $('#formErrors').addClass('d-none').empty();
-                    $('#saveTask').prop('disabled', true).text('Saving...');
+                    $('#create-formErrors').addClass('d-none').empty();
+                    $('#saveCreateTask').prop('disabled', true).text('Saving...');
 
                     $.ajax({
-                        url: url,
-                        method: method,
+                        url: '{{ route("tasks.store") }}',
+                        method: 'POST',
                         data: $(this).serialize(),
                         success: function (response) {
-                            taskModal.hide();
+                            createModal.hide();
                             showSuccess(response.message);
                             loadBoard();
                         },
                         error: function (xhr) {
                             if (xhr.status === 422) {
-                                const errors = xhr.responseJSON.errors;
                                 let messages = '';
-                                Object.values(errors).forEach(function (fieldErrors) {
+                                Object.values(xhr.responseJSON.errors).forEach(function (fieldErrors) {
                                     fieldErrors.forEach(function (message) {
                                         messages += `<div>${message}</div>`;
                                     });
                                 });
-                                $('#formErrors').html(messages).removeClass('d-none');
+                                $('#create-formErrors').html(messages).removeClass('d-none');
                             } else {
                                 alert(xhr.responseJSON?.message || 'Unable to save task.');
                             }
                         },
                         complete: function () {
-                            $('#saveTask')
-                                .prop('disabled', false)
-                                .text(id ? 'Update' : 'Create');
+                            $('#saveCreateTask').prop('disabled', false).text('Save');
+                        }
+                    });
+                });
+
+                $('#edit-task-form').on('submit', function (e) {
+                    e.preventDefault();
+
+                    const id = $('#edit-task_id').val();
+
+                    $('#edit-formErrors').addClass('d-none').empty();
+                    $('#saveEditTask').prop('disabled', true).text('Saving...');
+
+                    $.ajax({
+                        url: `/tasks/${id}`,
+                        method: 'PUT',
+                        data: $(this).serialize(),
+                        success: function (response) {
+                            editModal.hide();
+                            showSuccess(response.message);
+                            loadBoard();
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                let messages = '';
+                                Object.values(xhr.responseJSON.errors).forEach(function (fieldErrors) {
+                                    fieldErrors.forEach(function (message) {
+                                        messages += `<div>${message}</div>`;
+                                    });
+                                });
+                                $('#edit-formErrors').html(messages).removeClass('d-none');
+                            } else {
+                                alert(xhr.responseJSON?.message || 'Unable to save task.');
+                            }
+                        },
+                        complete: function () {
+                            $('#saveEditTask').prop('disabled', false).text('Save');
                         }
                     });
                 });
@@ -415,7 +524,6 @@
                 // Delete
                 const deleteModalElement = document.getElementById('deleteTaskModal');
                 const deleteModal = new bootstrap.Modal(deleteModalElement);
-
                 let deleteTaskId = null;
 
                 $('#kanban-board').on('click', '.delete-task', function (e) {
@@ -488,5 +596,4 @@
                 loadBoard();
             });
         </script>
-    @endpush
-</x-app-layout>
+    @endpush</x-app-layout>

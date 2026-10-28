@@ -1,7 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <x-page-header
-            title="{{ $project->name }} — Tickets"
+            title="{{ $project->name }} â€” Tickets"
             action-label="Create"
             action-id="create-ticket"
             permission="create tickets"
@@ -93,39 +93,39 @@
         </div>
     </div>
 
-    <!-- Create/Edit Modal -->
-    <div class="modal fade" id="ticketModal" tabindex="-1"
-        aria-labelledby="ticketModalTitle" aria-hidden="true">
+    <!-- Create Modal -->
+    <div class="modal fade" id="create-ticket-modal" tabindex="-1"
+        aria-labelledby="createTicketModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form id="ticketForm">
+                <form id="create-ticket-form">
                     @csrf
-                    <input type="hidden" id="ticket_id">
+                    <input type="hidden" id="create-ticket_id">
 
                     <div class="modal-header">
-                        <h5 class="modal-title" id="ticketModalTitle">Create Ticket</h5>
+                        <h5 class="modal-title" id="createTicketModalTitle">Create Ticket</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
                     <div class="modal-body">
-                        <div id="formErrors" class="alert alert-danger d-none"></div>
+                        <div id="create-formErrors" class="alert alert-danger d-none"></div>
 
                         <div class="mb-3">
-                            <label for="title" class="form-label">Title</label>
-                            <input type="text" name="title" id="title"
+                            <label for="create-title" class="form-label">Title</label>
+                            <input type="text" name="title" id="create-title"
                                 class="form-control" required minlength="3" maxlength="255">
                         </div>
 
                         <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea name="description" id="description"
+                            <label for="create-description" class="form-label">Description</label>
+                            <textarea name="description" id="create-description"
                                 class="form-control" rows="3"></textarea>
                         </div>
 
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label for="label_form" class="form-label">Label</label>
-                                <select name="label" id="label_form" class="form-select" required>
+                                <label for="create-label_form" class="form-label">Label</label>
+                                <select name="label" id="create-label_form" class="form-select" required>
                                     <option value="task">Task</option>
                                     <option value="bug">Bug</option>
                                     <option value="feature">Feature</option>
@@ -133,8 +133,8 @@
                                 </select>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label for="priority_form" class="form-label">Priority</label>
-                                <select name="priority" id="priority_form" class="form-select" required>
+                                <label for="create-priority_form" class="form-label">Priority</label>
+                                <select name="priority" id="create-priority_form" class="form-select" required>
                                     <option value="low">Low</option>
                                     <option value="medium" selected>Medium</option>
                                     <option value="high">High</option>
@@ -142,8 +142,8 @@
                                 </select>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label for="status_form" class="form-label">Status</label>
-                                <select name="status" id="status_form" class="form-select" required>
+                                <label for="create-status_form" class="form-label">Status</label>
+                                <select name="status" id="create-status_form" class="form-select" required>
                                     <option value="open">Open</option>
                                     <option value="in_progress">In Progress</option>
                                     <option value="resolved">Resolved</option>
@@ -154,14 +154,14 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="due_date" class="form-label">Due Date</label>
-                                <input type="date" name="due_date" id="due_date" class="form-control">
+                                <label for="create-due_date" class="form-label">Due Date</label>
+                                <input type="date" name="due_date" id="create-due_date" class="form-control">
                             </div>
                             <div class="col-md-6 mb-3 d-flex align-items-end">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox"
-                                        name="is_active" id="is_active" value="1" checked>
-                                    <label class="form-check-label" for="is_active">Active</label>
+                                        name="is_active" id="create-is_active" value="1" checked>
+                                    <label class="form-check-label" for="create-is_active">Active</label>
                                 </div>
                             </div>
                         </div>
@@ -169,14 +169,95 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" id="saveTicket" class="btn btn-primary">Save</button>
+                        <button type="submit" id="saveCreateTicket" class="btn btn-primary">Save</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
+    <!-- Edit Modal -->
+    <div class="modal fade" id="edit-ticket-modal" tabindex="-1"
+        aria-labelledby="editTicketModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="edit-ticket-form">
+                    @csrf
+                    <input type="hidden" id="edit-ticket_id">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editTicketModalTitle">Edit Ticket</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div id="edit-formErrors" class="alert alert-danger d-none"></div>
+
+                        <div class="mb-3">
+                            <label for="edit-title" class="form-label">Title</label>
+                            <input type="text" name="title" id="edit-title"
+                                class="form-control" required minlength="3" maxlength="255">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="edit-description" class="form-label">Description</label>
+                            <textarea name="description" id="edit-description"
+                                class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="edit-label_form" class="form-label">Label</label>
+                                <select name="label" id="edit-label_form" class="form-select" required>
+                                    <option value="task">Task</option>
+                                    <option value="bug">Bug</option>
+                                    <option value="feature">Feature</option>
+                                    <option value="improvement">Improvement</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="edit-priority_form" class="form-label">Priority</label>
+                                <select name="priority" id="edit-priority_form" class="form-select" required>
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="edit-status_form" class="form-label">Status</label>
+                                <select name="status" id="edit-status_form" class="form-select" required>
+                                    <option value="open">Open</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="resolved">Resolved</option>
+                                    <option value="closed">Closed</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="edit-due_date" class="form-label">Due Date</label>
+                                <input type="date" name="due_date" id="edit-due_date" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3 d-flex align-items-end">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                        name="is_active" id="edit-is_active" value="1" checked>
+                                    <label class="form-check-label" for="edit-is_active">Active</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="saveEditTicket" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>    <!-- Delete Confirmation Modal -->
     <x-delete-confirmation-modal
         id="deleteTicketModal"
         title="Confirm Delete"
@@ -191,8 +272,8 @@
             $(document).ready(function () {
                 const PROJECT_ID = {{ $project->id }};
 
-                const ticketModalElement = document.getElementById('ticketModal');
-                const ticketModal = new bootstrap.Modal(ticketModalElement);
+                const createModal = new bootstrap.Modal(document.getElementById('create-ticket-modal'));
+                const editModal = new bootstrap.Modal(document.getElementById('edit-ticket-modal'));
 
                 const STATUS_LABELS = {
                     open: 'Open',
@@ -212,20 +293,7 @@
                     return $('<div>').text(s == null ? '' : s).html();
                 }
 
-                function todayISO() {
-                    const d = new Date();
-                    const y = d.getFullYear();
-                    const m = String(d.getMonth() + 1).padStart(2, '0');
-                    const day = String(d.getDate()).padStart(2, '0');
-                    return `${y}-${m}-${day}`;
-                }
-
-                function isOverdue(ticket) {
-                    if (! ticket.due_date) return false;
-                    if (ticket.status === 'closed') return false;
-                    return ticket.due_date < todayISO();
-                }
-
+                // loading board
                 function loadBoard() {
                     const params = {
                         search:   $('#search').val(),
@@ -236,7 +304,7 @@
                     };
 
                     $.ajax({
-                        url: `/projects/${PROJECT_ID}/tickets/board`,
+                        url: '{{ route("projects.tickets.board", ["projectId" => PROJECT_ID]) }}',
                         method: 'GET',
                         data: params,
                         success: function (response) {
@@ -249,67 +317,63 @@
                     });
                 }
 
+                // render the board with tickets
                 function renderBoard(tickets) {
-                    const groups = { open: [], in_progress: [], resolved: [], closed: [] };
+                    const groups = {
+                        open: [],
+                        in_progress: [],
+                        resolved: [],
+                        closed: [],
+                    };
 
                     tickets.forEach(function (ticket) {
-                        if (groups[ticket.status]) groups[ticket.status].push(ticket);
+                        if (groups.hasOwnProperty(ticket.status)) {
+                            groups[ticket.status].push(ticket);
+                        }
                     });
 
                     Object.keys(groups).forEach(function (status) {
-                        const $col = $('.kanban-column[data-status="' + status + '"]');
+                        const $col = $(`.kanban-column[data-status="${status}"]`);
                         $col.empty();
-                        $('[data-count="' + status + '"]').text(groups[status].length);
+
+                        const countEl = $col.closest('.card').find('.badge[data-count]');
+                        if (countEl.length) {
+                            countEl.text(groups[status].length);
+                        }
 
                         groups[status].forEach(function (ticket) {
-                            $col.append(buildCard(ticket));
+                            const $card = $(`
+                                <div class="card mb-2 ticket-card" data-id="${ticket.id}">
+                                    <div class="card-body">
+                                        <h6 class="card-title">${escapeHtml(ticket.title)}</h6>
+                                        <p class="card-text text-muted small">${escapeHtml(ticket.description || '')}</p>
+                                        <small class="text-muted">Label: ${escapeHtml(ticket.label)} | Priority: ${escapeHtml(ticket.priority)}</small><br>
+                                        ${ticket.due_date ? `<small class="text-muted">Due: ${escapeHtml(ticket.due_date)}</small><br>` : ''}
+                                        <button type="button" class="btn btn-sm btn-success edit-ticket" data-id="${ticket.id}">Edit</button>
+                                        <button type="button" class="btn btn-sm btn-danger delete-ticket" data-id="${ticket.id}">Delete</button>
+                                    </div>
+                                </div>
+                            `);
+                            $col.append($card);
                         });
                     });
                 }
 
-                function buildCard(ticket) {
-                    const dueClass = isOverdue(ticket) ? 'text-danger fw-bold' : 'text-muted';
-                    const dueText  = ticket.due_date ? ticket.due_date : 'No due date';
-                    const priorityColor = {
-                        low: 'bg-secondary',
-                        medium: 'bg-info',
-                        high: 'bg-warning',
-                        urgent: 'bg-danger',
-                    }[ticket.priority] || 'bg-secondary';
-
-                    return `
-                        <div class="card mb-2 ticket-card" data-id="${ticket.id}">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <h6 class="mb-1">${escapeHtml(ticket.title)}</h6>
-                                    <span class="badge ${priorityColor}">${escapeHtml(ticket.priority)}</span>
-                                </div>
-                                <div class="small text-muted mb-1">${escapeHtml(ticket.label || '—')}</div>
-                                <div class="small mb-1 ${dueClass}"><strong>Due:</strong> ${escapeHtml(dueText)}</div>
-                                <div class="text-end">${ticket.action}</div>
-                            </div>
-                        </div>
-                    `;
+                function resetCreateForm() {
+                    $('#create-ticket-form')[0].reset();
+                    $('#create-ticket_id').val('');
+                    $('#create-formErrors').addClass('d-none').empty();
                 }
 
-                let searchDebounce;
-                $('#label, #priority, #status, #overdue').on('change', loadBoard);
-                $('#search').on('input', function () {
-                    clearTimeout(searchDebounce);
-                    searchDebounce = setTimeout(loadBoard, 300);
-                });
-
-                function resetForm() {
-                    $('#ticketForm')[0].reset();
-                    $('#ticket_id').val('');
-                    $('#formErrors').addClass('d-none').empty();
+                function resetEditForm() {
+                    $('#edit-ticket-form')[0].reset();
+                    $('#edit-ticket_id').val('');
+                    $('#edit-formErrors').addClass('d-none').empty();
                 }
 
                 $('#create-ticket').on('click', function () {
-                    resetForm();
-                    $('#ticketModalTitle').text('Create Ticket');
-                    $('#saveTicket').text('Create');
-                    ticketModal.show();
+                    resetCreateForm();
+                    createModal.show();
                 });
 
                 $('#kanban-board').on('click', '.edit-ticket', function (e) {
@@ -321,23 +385,21 @@
                     button.text('Loading...');
 
                     const id = button.data('id');
-                    resetForm();
+                    resetEditForm();
 
                     $.ajax({
-                        url: `/tickets/${id}/data`,
+                        url: `/tickets/${id}/edit`,
                         method: 'GET',
                         success: function (ticket) {
-                            $('#ticket_id').val(ticket.id);
-                            $('#title').val(ticket.title);
-                            $('#description').val(ticket.description);
-                            $('#label_form').val(ticket.label);
-                            $('#priority_form').val(ticket.priority);
-                            $('#status_form').val(ticket.status);
-                            $('#due_date').val(ticket.due_date);
-                            $('#is_active').prop('checked', !!ticket.is_active);
-                            $('#ticketModalTitle').text('Edit Ticket');
-                            $('#saveTicket').text('Update');
-                            ticketModal.show();
+                            $('#edit-ticket_id').val(ticket.id);
+                            $('#edit-title').val(ticket.title);
+                            $('#edit-description').val(ticket.description);
+                            $('#edit-label_form').val(ticket.label);
+                            $('#edit-priority_form').val(ticket.priority);
+                            $('#edit-status_form').val(ticket.status);
+                            $('#edit-due_date').val(ticket.due_date);
+                            $('#edit-is_active').prop('checked', !!ticket.is_active);
+                            editModal.show();
                         },
                         error: function (xhr) {
                             alert(xhr.responseJSON?.message || 'Unable to load ticket.');
@@ -350,24 +412,18 @@
                     });
                 });
 
-                $('#ticketForm').on('submit', function (e) {
+                $('#create-ticket-form').on('submit', function (e) {
                     e.preventDefault();
 
-                    const id = $('#ticket_id').val();
-                    const url = id
-                        ? `/tickets/${id}`
-                        : `/projects/${PROJECT_ID}/tickets`;
-                    const method = id ? 'PUT' : 'POST';
-
-                    $('#formErrors').addClass('d-none').empty();
-                    $('#saveTicket').prop('disabled', true).text('Saving...');
+                    $('#create-formErrors').addClass('d-none').empty();
+                    $('#saveCreateTicket').prop('disabled', true).text('Saving...');
 
                     $.ajax({
-                        url: url,
-                        method: method,
+                        url: `/projects/${PROJECT_ID}/tickets`,
+                        method: 'POST',
                         data: $(this).serialize(),
                         success: function (response) {
-                            ticketModal.hide();
+                            createModal.hide();
                             showSuccess(response.message);
                             loadBoard();
                         },
@@ -379,18 +435,60 @@
                                         messages += `<div>${message}</div>`;
                                     });
                                 });
-                                $('#formErrors').html(messages).removeClass('d-none');
+                                $('#create-formErrors').html(messages).removeClass('d-none');
                             } else {
                                 alert(xhr.responseJSON?.message || 'Unable to save ticket.');
                             }
                         },
                         complete: function () {
-                            $('#saveTicket')
-                                .prop('disabled', false)
-                                .text(id ? 'Update' : 'Create');
+                            $('#saveCreateTicket').prop('disabled', false).text('Save');
                         }
                     });
                 });
+
+                $('#edit-ticket-form').on('submit', function (e) {
+                    e.preventDefault();
+
+                    const id = $('#edit-ticket_id').val();
+
+                    $('#edit-formErrors').addClass('d-none').empty();
+                    $('#saveEditTicket').prop('disabled', true).text('Saving...');
+
+                    $.ajax({
+                        url: `/tickets/${id}`,
+                        method: 'PUT',
+                        data: $(this).serialize(),
+                        success: function (response) {
+                            editModal.hide();
+                            showSuccess(response.message);
+                            loadBoard();
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                let messages = '';
+                                Object.values(xhr.responseJSON.errors).forEach(function (fieldErrors) {
+                                    fieldErrors.forEach(function (message) {
+                                        messages += `<div>${message}</div>`;
+                                    });
+                                });
+                                $('#edit-formErrors').html(messages).removeClass('d-none');
+                            } else {
+                                alert(xhr.responseJSON?.message || 'Unable to save ticket.');
+                            }
+                        },
+                        complete: function () {
+                            $('#saveEditTicket').prop('disabled', false).text('Save');
+                        }
+                    });
+                });
+
+                // Filters
+                $('#search, #label, #priority, #status').on('change input', function () {
+                    clearTimeout(searchDebounce);
+                    searchDebounce = setTimeout(loadBoard, 300);
+                });
+                let searchDebounce;
+                $('#overdue').on('change', loadBoard);
 
                 // Delete
                 const deleteModalElement = document.getElementById('deleteTicketModal');
@@ -466,5 +564,5 @@
                 loadBoard();
             });
         </script>
-    @endpush
-</x-app-layout>
+    @endpush</x-app-layout>
+

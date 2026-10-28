@@ -14,9 +14,9 @@ class TicketController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:view projects',   only: ['index', 'board', 'show']),
-            new Middleware('permission:create tickets',  only: ['store']),
-            new Middleware('permission:edit tickets',    only: ['show', 'update', 'updateStatus']),
+            new Middleware('permission:view projects',   only: ['index', 'board']),
+            new Middleware('permission:create tickets',  only: ['create', 'store']),
+            new Middleware('permission:edit tickets',    only: ['edit', 'update', 'updateStatus']),
             new Middleware('permission:delete tickets',  only: ['destroy']),
         ];
     }
@@ -59,12 +59,14 @@ class TicketController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function show($id = null)
+    // Return reference data for creating a ticket.
+    public function create()
     {
-        if (! $id) {
-            return response()->json([]);
-        }
+        return response()->json([]);
+    }
 
+    public function edit($id)
+    {
         $ticket = Ticket::getTicketForEdit($id);
 
         if (! $ticket) {

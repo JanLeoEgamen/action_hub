@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <x-page-header
             title="Projects"
@@ -56,39 +56,39 @@
         </div>
     </div>
 
-    <!-- Create/Edit Modal -->
-    <div class="modal fade" id="projectModal" tabindex="-1"
-        aria-labelledby="projectModalTitle" aria-hidden="true">
+    <!-- Create Modal -->
+    <div class="modal fade" id="create-project-modal" tabindex="-1"
+        aria-labelledby="createProjectModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form id="projectForm">
+                <form id="create-project-form">
                     @csrf
-                    <input type="hidden" id="project_id">
+                    <input type="hidden" id="create-project_id">
 
                     <div class="modal-header">
-                        <h5 class="modal-title" id="projectModalTitle">Create Project</h5>
+                        <h5 class="modal-title" id="createProjectModalTitle">Create Project</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
                     <div class="modal-body">
-                        <div id="formErrors" class="alert alert-danger d-none"></div>
+                        <div id="create-formErrors" class="alert alert-danger d-none"></div>
 
                         <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" name="name" id="name"
+                            <label for="create-name" class="form-label">Name</label>
+                            <input type="text" name="name" id="create-name"
                                 class="form-control" required minlength="3" maxlength="255">
                         </div>
 
                         <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea name="description" id="description"
+                            <label for="create-description" class="form-label">Description</label>
+                            <textarea name="description" id="create-description"
                                 class="form-control" rows="3"></textarea>
                         </div>
 
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label for="status_form" class="form-label">Status</label>
-                                <select name="status" id="status_form" class="form-select" required>
+                                <label for="create-status_form" class="form-label">Status</label>
+                                <select name="status" id="create-status_form" class="form-select" required>
                                     <option value="planning">Planning</option>
                                     <option value="in_progress">In Progress</option>
                                     <option value="on_hold">On Hold</option>
@@ -97,18 +97,18 @@
                                 </select>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label for="start_date" class="form-label">Start Date</label>
-                                <input type="date" name="start_date" id="start_date" class="form-control">
+                                <label for="create-start_date" class="form-label">Start Date</label>
+                                <input type="date" name="start_date" id="create-start_date" class="form-control">
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label for="end_date" class="form-label">End Date</label>
-                                <input type="date" name="end_date" id="end_date" class="form-control">
+                                <label for="create-end_date" class="form-label">End Date</label>
+                                <input type="date" name="end_date" id="create-end_date" class="form-control">
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label d-block">Members</label>
-                            <div id="member_ids" class="border rounded p-2"
+                            <div id="create-member_ids" class="border rounded p-2"
                                 style="max-height: 200px; overflow-y: auto;">
                                 @foreach ($users as $user)
                                     <div class="form-check">
@@ -116,8 +116,8 @@
                                             type="checkbox"
                                             name="member_ids[]"
                                             value="{{ $user->id }}"
-                                            id="member_{{ $user->id }}">
-                                        <label class="form-check-label" for="member_{{ $user->id }}">
+                                            id="create-member_{{ $user->id }}">
+                                        <label class="form-check-label" for="create-member_{{ $user->id }}">
                                             {{ trim($user->first_name . ' ' . $user->last_name) }}
                                         </label>
                                     </div>
@@ -127,20 +127,104 @@
 
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox"
-                                name="is_active" id="is_active_form" value="1" checked>
-                            <label class="form-check-label" for="is_active_form">Active</label>
+                                name="is_active" id="create-is_active_form" value="1" checked>
+                            <label class="form-check-label" for="create-is_active_form">Active</label>
                         </div>
                     </div>
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" id="saveProject" class="btn btn-primary">Save</button>
+                        <button type="submit" id="saveCreateProject" class="btn btn-primary">Save</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- Edit Modal -->
+    <div class="modal fade" id="edit-project-modal" tabindex="-1"
+        aria-labelledby="editProjectModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="edit-project-form">
+                    @csrf
+                    <input type="hidden" id="edit-project_id">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editProjectModalTitle">Edit Project</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div id="edit-formErrors" class="alert alert-danger d-none"></div>
+
+                        <div class="mb-3">
+                            <label for="edit-name" class="form-label">Name</label>
+                            <input type="text" name="name" id="edit-name"
+                                class="form-control" required minlength="3" maxlength="255">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="edit-description" class="form-label">Description</label>
+                            <textarea name="description" id="edit-description"
+                                class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="edit-status_form" class="form-label">Status</label>
+                                <select name="status" id="edit-status_form" class="form-select" required>
+                                    <option value="planning">Planning</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="on_hold">On Hold</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="edit-start_date" class="form-label">Start Date</label>
+                                <input type="date" name="start_date" id="edit-start_date" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="edit-end_date" class="form-label">End Date</label>
+                                <input type="date" name="end_date" id="edit-end_date" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label d-block">Members</label>
+                            <div id="edit-member_ids" class="border rounded p-2"
+                                style="max-height: 200px; overflow-y: auto;">
+                                @foreach ($users as $user)
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                            type="checkbox"
+                                            name="member_ids[]"
+                                            value="{{ $user->id }}"
+                                            id="edit-member_{{ $user->id }}">
+                                        <label class="form-check-label" for="edit-member_{{ $user->id }}">
+                                            {{ trim($user->first_name . ' ' . $user->last_name) }}
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox"
+                                name="is_active" id="edit-is_active_form" value="1" checked>
+                            <label class="form-check-label" for="edit-is_active_form">Active</label>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="saveEditProject" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <!-- Delete Confirmation Modal -->
     <x-delete-confirmation-modal
         id="deleteProjectModal"
@@ -153,8 +237,8 @@
     @push('scripts')
         <script>
             $(document).ready(function () {
-                const projectModalElement = document.getElementById('projectModal');
-                const projectModal = new bootstrap.Modal(projectModalElement);
+                const createModal = new bootstrap.Modal(document.getElementById('create-project-modal'));
+                const editModal = new bootstrap.Modal(document.getElementById('edit-project-modal'));
 
                 const STATUS_LABELS = {
                     planning: 'Planning',
@@ -227,13 +311,14 @@
                                             ${escapeHtml(p.description || 'No description.')}
                                         </p>
                                         <ul class="list-unstyled small mb-3">
-                                            <li><strong>Owner:</strong> ${escapeHtml(p.owner || '—')}</li>
+                                            <li><strong>Owner:</strong> ${escapeHtml(p.owner || '\u2014')}</li>
                                             <li><strong>Tickets:</strong> ${p.tickets}</li>
-                                            <li><strong>Start:</strong> ${escapeHtml(p.start_date || '—')}</li>
-                                            <li><strong>End:</strong> ${escapeHtml(p.end_date || '—')}</li>
+                                            <li><strong>Start:</strong> ${escapeHtml(p.start_date || '\u2014')}</li>
+                                            <li><strong>End:</strong> ${escapeHtml(p.end_date || '\u2014')}</li>
                                         </ul>
-                                        <div class="d-flex flex-wrap gap-1 mt-auto">
-                                            ${p.action}
+                                        <div class="mt-auto d-flex gap-2">
+                                            <button type="button" class="btn btn-sm btn-success edit-project" data-id="${p.id}">Edit</button>
+                                            <button type="button" class="btn btn-sm btn-danger delete-project" data-id="${p.id}">Delete</button>
                                         </div>
                                     </div>
                                 </div>
@@ -242,25 +327,24 @@
                     });
                 }
 
-                let searchDebounce;
-                $('#filter, #status, #is_active').on('change', loadList);
-                $('#search').on('input', function () {
-                    clearTimeout(searchDebounce);
-                    searchDebounce = setTimeout(loadList, 300);
-                });
+                function resetCreateForm() {
+                    $('#create-project-form')[0].reset();
+                    $('#create-project_id').val('');
+                    $('#create-member_ids input[type="checkbox"]').prop('checked', false);
+                    $('#create-is_active_form').prop('checked', true);
+                    $('#create-formErrors').addClass('d-none').empty();
+                }
 
-                function resetForm() {
-                    $('#projectForm')[0].reset();
-                    $('#project_id').val('');
-                    $('#member_ids input[type="checkbox"]').prop('checked', false);
-                    $('#formErrors').addClass('d-none').empty();
+                function resetEditForm() {
+                    $('#edit-project-form')[0].reset();
+                    $('#edit-project_id').val('');
+                    $('#edit-member_ids input[type="checkbox"]').prop('checked', false);
+                    $('#edit-formErrors').addClass('d-none').empty();
                 }
 
                 $('#create-project').on('click', function () {
-                    resetForm();
-                    $('#projectModalTitle').text('Create Project');
-                    $('#saveProject').text('Create');
-                    projectModal.show();
+                    resetCreateForm();
+                    createModal.show();
                 });
 
                 $('#projectCardGrid').on('click', '.edit-project', function (e) {
@@ -273,27 +357,25 @@
                     button.text('Loading...');
 
                     const id = button.data('id');
-                    resetForm();
+                    resetEditForm();
 
                     $.ajax({
-                        url: `/projects/${id}/data`,
+                        url: `/projects/${id}/edit`,
                         method: 'GET',
                         success: function (project) {
-                            $('#project_id').val(project.id);
-                            $('#name').val(project.name);
-                            $('#description').val(project.description);
-                            $('#status_form').val(project.status);
-                            $('#start_date').val(project.start_date);
-                            $('#end_date').val(project.end_date);
-                            $('#is_active_form').prop('checked', !!project.is_active);
-                            $('#member_ids input[type="checkbox"]').prop('checked', false);
+                            $('#edit-project_id').val(project.id);
+                            $('#edit-name').val(project.name);
+                            $('#edit-description').val(project.description);
+                            $('#edit-status_form').val(project.status);
+                            $('#edit-start_date').val(project.start_date);
+                            $('#edit-end_date').val(project.end_date);
+                            $('#edit-is_active_form').prop('checked', !!project.is_active);
+                            $('#edit-member_ids input[type="checkbox"]').prop('checked', false);
                             (project.member_ids || []).forEach(function (uid) {
-                                $('#member_ids input[type="checkbox"][value="' + uid + '"]')
+                                $('#edit-member_ids input[type="checkbox"][value="' + uid + '"]')
                                     .prop('checked', true);
                             });
-                            $('#projectModalTitle').text('Edit Project');
-                            $('#saveProject').text('Update');
-                            projectModal.show();
+                            editModal.show();
                         },
                         error: function (xhr) {
                             alert(xhr.responseJSON?.message || 'Unable to load project.');
@@ -306,22 +388,18 @@
                     });
                 });
 
-                $('#projectForm').on('submit', function (e) {
+                $('#create-project-form').on('submit', function (e) {
                     e.preventDefault();
 
-                    const id = $('#project_id').val();
-                    const url = id ? `/projects/${id}` : '{{ route("projects.store") }}';
-                    const method = id ? 'PUT' : 'POST';
-
-                    $('#formErrors').addClass('d-none').empty();
-                    $('#saveProject').prop('disabled', true).text('Saving...');
+                    $('#create-formErrors').addClass('d-none').empty();
+                    $('#saveCreateProject').prop('disabled', true).text('Saving...');
 
                     $.ajax({
-                        url: url,
-                        method: method,
+                        url: '{{ route("projects.store") }}',
+                        method: 'POST',
                         data: $(this).serialize(),
                         success: function (response) {
-                            projectModal.hide();
+                            createModal.hide();
                             showSuccess(response.message);
                             loadList();
                         },
@@ -333,17 +411,59 @@
                                         messages += `<div>${message}</div>`;
                                     });
                                 });
-                                $('#formErrors').html(messages).removeClass('d-none');
+                                $('#create-formErrors').html(messages).removeClass('d-none');
                             } else {
                                 alert(xhr.responseJSON?.message || 'Unable to save project.');
                             }
                         },
                         complete: function () {
-                            $('#saveProject')
-                                .prop('disabled', false)
-                                .text(id ? 'Update' : 'Create');
+                            $('#saveCreateProject').prop('disabled', false).text('Save');
                         }
                     });
+                });
+
+                $('#edit-project-form').on('submit', function (e) {
+                    e.preventDefault();
+
+                    const id = $('#edit-project_id').val();
+
+                    $('#edit-formErrors').addClass('d-none').empty();
+                    $('#saveEditProject').prop('disabled', true).text('Saving...');
+
+                    $.ajax({
+                        url: `/projects/${id}`,
+                        method: 'PUT',
+                        data: $(this).serialize(),
+                        success: function (response) {
+                            editModal.hide();
+                            showSuccess(response.message);
+                            loadList();
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                let messages = '';
+                                Object.values(xhr.responseJSON.errors).forEach(function (fieldErrors) {
+                                    fieldErrors.forEach(function (message) {
+                                        messages += `<div>${message}</div>`;
+                                    });
+                                });
+                                $('#edit-formErrors').html(messages).removeClass('d-none');
+                            } else {
+                                alert(xhr.responseJSON?.message || 'Unable to save project.');
+                            }
+                        },
+                        complete: function () {
+                            $('#saveEditProject').prop('disabled', false).text('Save');
+                        }
+                    });
+                });
+
+                // Filters
+                $('#filter, #status, #is_active').on('change', loadList);
+                let searchDebounce;
+                $('#search').on('input', function () {
+                    clearTimeout(searchDebounce);
+                    searchDebounce = setTimeout(loadList, 300);
                 });
 
                 // Delete
@@ -387,5 +507,4 @@
                 loadList();
             });
         </script>
-    @endpush
-</x-app-layout>
+    @endpush</x-app-layout>

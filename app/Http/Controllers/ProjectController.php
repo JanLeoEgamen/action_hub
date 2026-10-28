@@ -13,9 +13,9 @@ class ProjectController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:view projects',   only: ['index', 'list', 'show']),
-            new Middleware('permission:create projects', only: ['store']),
-            new Middleware('permission:edit projects',   only: ['show', 'update']),
+            new Middleware('permission:view projects',   only: ['index', 'list']),
+            new Middleware('permission:create projects', only: ['create', 'store']),
+            new Middleware('permission:edit projects',   only: ['edit', 'update']),
             new Middleware('permission:delete projects', only: ['destroy']),
         ];
     }
@@ -46,13 +46,15 @@ class ProjectController extends Controller implements HasMiddleware
         ]);
     }
 
-    // Return one project for edit modal
-    public function show($id = null)
+    // Return reference data for creating a project.
+    public function create()
     {
-        if (! $id) {
-            return response()->json([]);
-        }
+        return response()->json([]);
+    }
 
+    // Return one project for edit modal
+    public function edit($id)
+    {
         $project = Project::getProjectForEdit($id);
 
         if (! $project) {

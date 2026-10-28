@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <x-page-header
             title="Companies"
@@ -32,33 +32,30 @@
         </div>
     </div>
 
-    <!-- Create/Edit Modal -->
-    <div class="modal fade" id="companyModal" tabindex="-1" aria-hidden="true">
+    <!-- Create Modal -->
+    <div class="modal fade" id="create-company-modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form id="companyForm">
+                <form id="create-company-form">
                     @csrf
-                    <input type="hidden" id="company_id">
+                    <input type="hidden" id="create-company_id">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle">Create Company</h5>
+                        <h5 class="modal-title" id="createModalTitle">Create Company</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <div id="formErrors" class="alert alert-danger d-none"></div>
-                        
+                        <div id="create-formErrors" class="alert alert-danger d-none"></div>
                         <div class="mb-3">
-                            <label for="company_name" class="form-label">Company Name</label>
-                            <input type="text" name="company_name" id="company_name" class="form-control" required maxlength="255">
+                            <label for="create-company_name" class="form-label">Company Name</label>
+                            <input type="text" name="company_name" id="create-company_name" class="form-control" required maxlength="255">
                         </div>
-
                         <div class="mb-3">
-                            <label for="company_description" class="form-label">Description</label>
-                            <textarea name="company_description" id="company_description" class="form-control" rows="3"></textarea>
+                            <label for="create-company_description" class="form-label">Description</label>
+                            <textarea name="company_description" id="create-company_description" class="form-control" rows="3"></textarea>
                         </div>
-
                         <div class="mb-3">
-                            <label for="is_active" class="form-label">Status</label>
-                            <select name="is_active" id="is_active" class="form-select" required>
+                            <label for="create-is_active" class="form-label">Status</label>
+                            <select name="is_active" id="create-is_active" class="form-select" required>
                                 <option value="1">Active</option>
                                 <option value="0">Inactive</option>
                             </select>
@@ -66,7 +63,45 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" id="saveCompany" class="btn btn-primary">Create</button>
+                        <button type="submit" id="saveCreateCompany" class="btn btn-primary">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="edit-company-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="edit-company-form">
+                    @csrf
+                    <input type="hidden" id="edit-company_id">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalTitle">Edit Company</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="edit-formErrors" class="alert alert-danger d-none"></div>
+                        <div class="mb-3">
+                            <label for="edit-company_name" class="form-label">Company Name</label>
+                            <input type="text" name="company_name" id="edit-company_name" class="form-control" required maxlength="255">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-company_description" class="form-label">Description</label>
+                            <textarea name="company_description" id="edit-company_description" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-is_active" class="form-label">Status</label>
+                            <select name="is_active" id="edit-is_active" class="form-select" required>
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="saveEditCompany" class="btn btn-primary">Update</button>
                     </div>
                 </form>
             </div>
@@ -84,7 +119,8 @@
     @push('scripts')
         <script>
             $(document).ready(function () {
-                const modal = new bootstrap.Modal(document.getElementById('companyModal'));
+                const createModal = new bootstrap.Modal(document.getElementById('create-company-modal'));
+                const editModal = new bootstrap.Modal(document.getElementById('edit-company-modal'));
                 const deleteModal = new bootstrap.Modal(document.getElementById('deleteCompanyModal'));
                 let deleteId = null;
 
@@ -102,55 +138,53 @@
                     ]
                 });
 
-                function resetForm() {
-                    $('#companyForm')[0].reset();
-                    $('#company_id').val('');
-                    $('#formErrors').addClass('d-none').empty();
-                    $('#is_active').val('1');
+                function resetCreateForm() {
+                    $('#create-company-form')[0].reset();
+                    $('#create-company_id').val('');
+                    $('#create-formErrors').addClass('d-none').empty();
+                    $('#create-is_active').val('1');
+                }
+
+                function resetEditForm() {
+                    $('#edit-company-form')[0].reset();
+                    $('#edit-company_id').val('');
+                    $('#edit-formErrors').addClass('d-none').empty();
+                    $('#edit-is_active').val('1');
                 }
 
                 $('#create-company').on('click', function () {
-                    resetForm();
-                    $('#modalTitle').text('Create Company');
-                    $('#saveCompany').text('Create');
-                    modal.show();
+                    resetCreateForm();
+                    createModal.show();
                 });
 
                 $('.datatable').on('click', '.edit-company', function () {
                     const id = $(this).data('id');
-                    resetForm();
+                    resetEditForm();
                     $.ajax({
-                        url: `/companies/${id}/data`,
+                        url: `/companies/${id}/edit`,
                         method: 'GET',
                         success: function (data) {
-                            $('#company_id').val(data.id);
-                            $('#company_name').val(data.company_name);
-                            $('#company_description').val(data.company_description);
-                            $('#is_active').val(data.is_active);
-                            
-                            $('#modalTitle').text('Edit Company');
-                            $('#saveCompany').text('Update');
-                            modal.show();
+                            $('#edit-company_id').val(data.id);
+                            $('#edit-company_name').val(data.company_name);
+                            $('#edit-company_description').val(data.company_description);
+                            $('#edit-is_active').val(data.is_active);
+                            editModal.show();
                         },
                         error: function () { alert('Unable to load data.'); }
                     });
                 });
 
-                $('#companyForm').on('submit', function (e) {
+                $('#create-company-form').on('submit', function (e) {
                     e.preventDefault();
-                    const id = $('#company_id').val();
-                    const url = id ? `/companies/${id}` : '{{ route("companies.store") }}';
-                    const method = id ? 'PUT' : 'POST';
-
-                    $('#formErrors').addClass('d-none').empty();
-                    $('#saveCompany').prop('disabled', true).text('Saving...');
+                    $('#create-formErrors').addClass('d-none').empty();
+                    $('#saveCreateCompany').prop('disabled', true).text('Saving...');
 
                     $.ajax({
-                        url: url,
-                        method: method,
+                        url: '{{ route("companies.store") }}',
+                        method: 'POST',
                         data: $(this).serialize(),
                         success: function (response) {
-                            modal.hide();
+                            createModal.hide();
                             table.ajax.reload(null, false);
                             $('#successMessage').text(response.message).removeClass('d-none');
                             setTimeout(() => $('#successMessage').addClass('d-none'), 3000);
@@ -161,13 +195,46 @@
                                 Object.values(xhr.responseJSON.errors).forEach(errs => {
                                     errs.forEach(msg => messages += `<div>${msg}</div>`);
                                 });
-                                $('#formErrors').html(messages).removeClass('d-none');
+                                $('#create-formErrors').html(messages).removeClass('d-none');
                             } else {
                                 alert('Something went wrong.');
                             }
                         },
                         complete: function () {
-                            $('#saveCompany').prop('disabled', false).text(id ? 'Update' : 'Create');
+                            $('#saveCreateCompany').prop('disabled', false).text('Create');
+                        }
+                    });
+                });
+
+                $('#edit-company-form').on('submit', function (e) {
+                    e.preventDefault();
+                    const id = $('#edit-company_id').val();
+                    $('#edit-formErrors').addClass('d-none').empty();
+                    $('#saveEditCompany').prop('disabled', true).text('Saving...');
+
+                    $.ajax({
+                        url: `/companies/${id}`,
+                        method: 'PUT',
+                        data: $(this).serialize(),
+                        success: function (response) {
+                            editModal.hide();
+                            table.ajax.reload(null, false);
+                            $('#successMessage').text(response.message).removeClass('d-none');
+                            setTimeout(() => $('#successMessage').addClass('d-none'), 3000);
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                let messages = '';
+                                Object.values(xhr.responseJSON.errors).forEach(errs => {
+                                    errs.forEach(msg => messages += `<div>${msg}</div>`);
+                                });
+                                $('#edit-formErrors').html(messages).removeClass('d-none');
+                            } else {
+                                alert('Something went wrong.');
+                            }
+                        },
+                        complete: function () {
+                            $('#saveEditCompany').prop('disabled', false).text('Update');
                         }
                     });
                 });

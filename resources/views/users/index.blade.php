@@ -34,19 +34,19 @@
         </div>
     </div>
 
-    <!-- Create/Edit Modal -->
-    <div class="modal fade" id="userModal" tabindex="-1"
-        aria-labelledby="modalTitle" aria-hidden="true">
+    <!-- Create Modal -->
+    <div class="modal fade" id="create-user-modal" tabindex="-1"
+        aria-labelledby="createModalTitle" aria-hidden="true">
 
         <div class="modal-dialog">
             <div class="modal-content">
-                <form id="userForm">
+                <form id="create-user-form">
                     @csrf
 
-                    <input type="hidden" id="user_id">
+                    <input type="hidden" id="create-user_id">
 
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle">
+                        <h5 class="modal-title" id="createModalTitle">
                             Create User
                         </h5>
 
@@ -57,30 +57,30 @@
                     </div>
 
                     <div class="modal-body">
-                        <div id="formErrors"
+                        <div id="create-formErrors"
                             class="alert alert-danger d-none"></div>
 
                         <div class="mb-3">
-                            <label for="first_name" class="form-label">
+                            <label for="create-first_name" class="form-label">
                                 First Name
                             </label>
 
                             <input type="text"
                                 name="first_name"
-                                id="first_name"
+                                id="create-first_name"
                                 class="form-control"
                                 required
                                 maxlength="30">
                         </div>
 
                         <div class="mb-3">
-                            <label for="last_name" class="form-label">
+                            <label for="create-last_name" class="form-label">
                                 Last Name
                             </label>
 
                             <input type="text"
                                 name="last_name"
-                                id="last_name"
+                                id="create-last_name"
                                 class="form-control"
                                 required
                                 minlength="4"
@@ -88,21 +88,21 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="email" class="form-label">
+                            <label for="create-email" class="form-label">
                                 Email Address
                             </label>
 
                             <input type="email"
                                 name="email"
-                                id="email"
+                                id="create-email"
                                 class="form-control"
                                 required
                                 maxlength="255">
                         </div>
 
                         <div class="mb-3">
-                            <label for="group_id" class="form-label">Group</label>
-                            <select name="group_id" id="group_id" class="form-select">
+                            <label for="create-group_id" class="form-label">Group</label>
+                            <select name="group_id" id="create-group_id" class="form-select">
                                 <option value="">Select Group (Optional)</option>
                                 @foreach($groups as $group)
                                     <option value="{{ $group->id }}">
@@ -115,19 +115,19 @@
                         <div class="mb-3">
                             <label class="form-label">Roles</label>
 
-                            <div id="roleCheckboxes" class="border rounded p-3">
+                            <div id="create-roleCheckboxes" class="border rounded p-3">
                                 @foreach ($roles as $role)
                                     <div class="form-check">
                                         <input
                                             type="checkbox"
                                             name="roles[]"
-                                            id="role_{{ $role->id }}"
+                                            id="create-role_{{ $role->id }}"
                                             value="{{ $role->id }}"
                                             class="form-check-input role-checkbox"
                                         >
 
                                         <label
-                                            for="role_{{ $role->id }}"
+                                            for="create-role_{{ $role->id }}"
                                             class="form-check-label"
                                         >
                                             {{ ucwords(str_replace('_', ' ', $role->name)) }}
@@ -138,13 +138,13 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="password" class="form-label">
+                            <label for="create-password" class="form-label">
                                 Password
                             </label>
 
                             <input type="password"
                                 name="password"
-                                id="password"
+                                id="create-password"
                                 class="form-control"
                                 required
                                 minlength="8"
@@ -154,13 +154,13 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="confirm_password" class="form-label">
+                            <label for="create-confirm_password" class="form-label">
                                 Confirm Password
                             </label>
 
                             <input type="password"
                                 name="confirm_password"
-                                id="confirm_password"
+                                id="create-confirm_password"
                                 class="form-control"
                                 required
                                 minlength="8"
@@ -176,7 +176,7 @@
                         </button>
 
                         <button type="submit"
-                            id="saveUser"
+                            id="saveCreateUser"
                             class="btn btn-primary">
                             Create
                         </button>
@@ -186,6 +186,155 @@
         </div>
     </div>
 
+    <!-- Edit Modal -->
+    <div class="modal fade" id="edit-user-modal" tabindex="-1"
+        aria-labelledby="editModalTitle" aria-hidden="true">
+
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="edit-user-form">
+                    @csrf
+
+                    <input type="hidden" id="edit-user_id">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalTitle">
+                            Edit User
+                        </h5>
+
+                        <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div id="edit-formErrors"
+                            class="alert alert-danger d-none"></div>
+
+                        <div class="mb-3">
+                            <label for="edit-first_name" class="form-label">
+                                First Name
+                            </label>
+
+                            <input type="text"
+                                name="first_name"
+                                id="edit-first_name"
+                                class="form-control"
+                                required
+                                maxlength="30">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="edit-last_name" class="form-label">
+                                Last Name
+                            </label>
+
+                            <input type="text"
+                                name="last_name"
+                                id="edit-last_name"
+                                class="form-control"
+                                required
+                                minlength="4"
+                                maxlength="30">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="edit-email" class="form-label">
+                                Email Address
+                            </label>
+
+                            <input type="email"
+                                name="email"
+                                id="edit-email"
+                                class="form-control"
+                                required
+                                maxlength="255">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="edit-group_id" class="form-label">Group</label>
+                            <select name="group_id" id="edit-group_id" class="form-select">
+                                <option value="">Select Group (Optional)</option>
+                                @foreach($groups as $group)
+                                    <option value="{{ $group->id }}">
+                                        {{ $group->company_name }} - {{ $group->department_name }} - {{ $group->group_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Roles</label>
+
+                            <div id="edit-roleCheckboxes" class="border rounded p-3">
+                                @foreach ($roles as $role)
+                                    <div class="form-check">
+                                        <input
+                                            type="checkbox"
+                                            name="roles[]"
+                                            id="edit-role_{{ $role->id }}"
+                                            value="{{ $role->id }}"
+                                            class="form-check-input role-checkbox"
+                                        >
+
+                                        <label
+                                            for="edit-role_{{ $role->id }}"
+                                            class="form-check-label"
+                                        >
+                                            {{ ucwords(str_replace('_', ' ', $role->name)) }}
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="edit-password" class="form-label">
+                                Password
+                            </label>
+
+                            <input type="password"
+                                name="password"
+                                id="edit-password"
+                                class="form-control"
+                                minlength="8"
+                                autocomplete="new-password">
+
+
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="edit-confirm_password" class="form-label">
+                                Confirm Password
+                            </label>
+
+                            <input type="password"
+                                name="confirm_password"
+                                id="edit-confirm_password"
+                                class="form-control"
+                                minlength="8"
+                                autocomplete="new-password">
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <button type="submit"
+                            id="saveEditUser"
+                            class="btn btn-primary">
+                            Update
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <!-- Delete Confirmation Modal -->
     <x-delete-confirmation-modal
         id="deleteUserModal"
@@ -198,8 +347,11 @@
     @push('scripts')
         <script>
             $(document).ready(function () {
-                const modalElement = document.getElementById('userModal');
-                const modal = new bootstrap.Modal(modalElement);
+                const createModalElement = document.getElementById('create-user-modal');
+                const createModal = new bootstrap.Modal(createModalElement);
+
+                const editModalElement = document.getElementById('edit-user-modal');
+                const editModal = new bootstrap.Modal(editModalElement);
 
                 const table = $('.datatable').DataTable({
                     processing: true,
@@ -232,27 +384,17 @@
                     ]
                 });
 
-                function resetForm() {
-                    $('#userForm')[0].reset();
-
-                    $('#user_id').val('');
-
-                    $('#formErrors')
-                        .addClass('d-none')
-                        .empty();
-
-                    $('#password, #confirm_password')
-                        .prop('required', true);
+                function resetCreateForm() {
+                    $('#create-user-form')[0].reset();
+                    $('#create-user_id').val('');
+                    $('#create-formErrors').addClass('d-none').empty();
+                    $('#create-password, #create-confirm_password').prop('required', true);
                 }
 
                 // Open modal for Create.
                 $('#create-user').on('click', function () {
-                    resetForm();
-
-                    $('#modalTitle').text('Create User');
-                    $('#saveUser').text('Create');
-
-                    modal.show();
+                    resetCreateForm();
+                    createModal.show();
                 });
 
                 // Open modal and load data for Edit.
@@ -273,43 +415,30 @@
 
                     button.text('Loading...');
 
-                    resetForm();
-
                     $.ajax({
-                        url: `/users/${id}/data`,
+                        url: `/users/${id}/edit`,
                         method: 'GET',
 
                         success: function (user) {
-                            $('#user_id').val(user.id);
-                            $('#first_name').val(user.first_name);
-                            $('#last_name').val(user.last_name);
-                            $('#email').val(user.email);
-                            $('#group_id').val(user.group_id ? String(user.group_id) : '');
+                            $('#edit-user_id').val(user.id);
+                            $('#edit-first_name').val(user.first_name);
+                            $('#edit-last_name').val(user.last_name);
+                            $('#edit-email').val(user.email);
+                            $('#edit-group_id').val(user.group_id ? String(user.group_id) : '');
 
-                            $('#role_id').val(
-                                user.role_id ? String(user.role_id) : ''
-                            );
+                            $('#edit-roleCheckboxes input[type="checkbox"]').prop('checked', false);
+                            if (user.role_id) {
+                                $('#edit-role_' + user.role_id).prop('checked', true);
+                            }
 
-                            // Password is optional during editing.
-                            $('#password')
-                                .val('')
-                                .prop('required', false);
+                            $('#edit-password').val('').prop('required', false);
+                            $('#edit-confirm_password').val('').prop('required', false);
 
-                            $('#confirm_password')
-                                .val('')
-                                .prop('required', false);
-
-                            $('#modalTitle').text('Edit User');
-                            $('#saveUser').text('Update');
-
-                            modal.show();
+                            editModal.show();
                         },
 
                         error: function (xhr) {
-                            alert(
-                                xhr.responseJSON?.message ||
-                                'Unable to load user.'
-                            );
+                            alert(xhr.responseJSON?.message || 'Unable to load user.');
                         },
 
                         complete: function () {
@@ -320,40 +449,22 @@
                     });
                 });
 
-                // Create or Update.
-                $('#userForm').on('submit', function (e) {
+                // Create form submit.
+                $('#create-user-form').on('submit', function (e) {
                     e.preventDefault();
 
-                    const id = $('#user_id').val();
-
-                    const url = id
-                        ? `/users/${id}`
-                        : '{{ route("users.store") }}';
-
-                    const method = id ? 'PUT' : 'POST';
-
-                    $('#formErrors')
-                        .addClass('d-none')
-                        .empty();
-
-                    $('#saveUser')
-                        .prop('disabled', true)
-                        .text('Saving...');
+                    $('#create-formErrors').addClass('d-none').empty();
+                    $('#saveCreateUser').prop('disabled', true).text('Saving...');
 
                     $.ajax({
-                        url: url,
-                        method: method,
+                        url: '{{ route("users.store") }}',
+                        method: 'POST',
                         data: $(this).serialize(),
 
                         success: function (response) {
-                            modal.hide();
-
+                            createModal.hide();
                             table.ajax.reload(null, false);
-
-                            $('#successMessage')
-                                .text(response.message)
-                                .removeClass('d-none');
-
+                            $('#successMessage').text(response.message).removeClass('d-none');
                             setTimeout(function () {
                                 $('#successMessage').addClass('d-none');
                             }, 3000);
@@ -363,35 +474,66 @@
                             if (xhr.status === 422) {
                                 const errors = xhr.responseJSON.errors;
                                 let messages = '';
-
                                 Object.values(errors).forEach(function (fieldErrors) {
                                     fieldErrors.forEach(function (message) {
-                                        messages +=
-                                            $('<div>')
-                                                .text(message)
-                                                .prop('outerHTML');
+                                        messages += $('<div>').text(message).prop('outerHTML');
                                     });
                                 });
-
-                                $('#formErrors')
-                                    .html(messages)
-                                    .removeClass('d-none');
+                                $('#create-formErrors').html(messages).removeClass('d-none');
                             } else {
-                                alert(
-                                    xhr.responseJSON?.message ||
-                                    'Unable to save user.'
-                                );
+                                alert(xhr.responseJSON?.message || 'Unable to save user.');
                             }
                         },
 
                         complete: function () {
-                            $('#saveUser')
-                                .prop('disabled', false)
-                                .text(id ? 'Update' : 'Create');
+                            $('#saveCreateUser').prop('disabled', false).text('Create');
                         }
                     });
                 });
 
+                // Edit form submit.
+                $('#edit-user-form').on('submit', function (e) {
+                    e.preventDefault();
+
+                    const id = $('#edit-user_id').val();
+
+                    $('#edit-formErrors').addClass('d-none').empty();
+                    $('#saveEditUser').prop('disabled', true).text('Saving...');
+
+                    $.ajax({
+                        url: `/users/${id}`,
+                        method: 'PUT',
+                        data: $(this).serialize(),
+
+                        success: function (response) {
+                            editModal.hide();
+                            table.ajax.reload(null, false);
+                            $('#successMessage').text(response.message).removeClass('d-none');
+                            setTimeout(function () {
+                                $('#successMessage').addClass('d-none');
+                            }, 3000);
+                        },
+
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                const errors = xhr.responseJSON.errors;
+                                let messages = '';
+                                Object.values(errors).forEach(function (fieldErrors) {
+                                    fieldErrors.forEach(function (message) {
+                                        messages += $('<div>').text(message).prop('outerHTML');
+                                    });
+                                });
+                                $('#edit-formErrors').html(messages).removeClass('d-none');
+                            } else {
+                                alert(xhr.responseJSON?.message || 'Unable to save user.');
+                            }
+                        },
+
+                        complete: function () {
+                            $('#saveEditUser').prop('disabled', false).text('Update');
+                        }
+                    });
+                });
                 // Delete using Bootstrap confirmation modal.
                 const deleteModalElement =
                     document.getElementById('deleteUserModal');
@@ -471,3 +613,4 @@
         </script>
     @endpush
 </x-app-layout>
+

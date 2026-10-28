@@ -5,6 +5,7 @@
     'message' => 'Are you sure you want to delete this record? This action cannot be undone.',
     'confirmButtonId' => 'confirmDelete',
     'confirmLabel' => 'Delete',
+    'actionUrl' => null,
 ])
 
 <div
@@ -17,43 +18,54 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
-            <div class="modal-header">
-                <h5
-                    class="modal-title"
-                    id="{{ $id }}Label"
-                >
-                    {{ $title }}
-                </h5>
+            <form
+                id="{{ $id }}-form"
+                method="POST"
+                @if($actionUrl) action="{{ $actionUrl }}" @endif
+            >
+                @csrf
+                @method('DELETE')
 
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                ></button>
-            </div>
+                <div class="modal-header">
+                    <h5
+                        class="modal-title"
+                        id="{{ $id }}Label"
+                    >
+                        {{ $title }}
+                    </h5>
 
-            <div class="modal-body">
-                {{ $message }}
-            </div>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                    ></button>
+                </div>
 
-            <div class="modal-footer">
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    data-bs-dismiss="modal"
-                >
-                    Cancel
-                </button>
+                <div class="modal-body">
+                    <div id="{{ $id }}-formErrors" class="alert alert-danger d-none"></div>
 
-                <button
-                    type="button"
-                    class="btn btn-danger"
-                    id="{{ $confirmButtonId }}"
-                >
-                    {{ $confirmLabel }}
-                </button>
-            </div>
+                    {{ $message }}
+                </div>
+
+                <div class="modal-footer">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-danger"
+                        id="{{ $confirmButtonId }}"
+                    >
+                        {{ $confirmLabel }}
+                    </button>
+                </div>
+            </form>
 
         </div>
     </div>

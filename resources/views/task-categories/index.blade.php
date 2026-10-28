@@ -1,4 +1,4 @@
-
+﻿
 <x-app-layout>
     <x-slot name="header">
         <x-page-header
@@ -34,40 +34,40 @@
         </div>
     </div>
 
-    <!-- Create/Edit Modal -->
-    <div class="modal fade" id="taskCategoryModal" tabindex="-1"
-        aria-labelledby="modalTitle" aria-hidden="true">
+    <!-- Create Modal -->
+    <div class="modal fade" id="create-taskCategory-modal" tabindex="-1"
+        aria-labelledby="createModalTitle" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form id="taskCategoryForm">
+                <form id="create-taskCategory-form">
                     @csrf
 
-                    <input type="hidden" id="category_id">
+                    <input type="hidden" id="create-category_id">
 
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle">Create Task Category</h5>
+                        <h5 class="modal-title" id="createModalTitle">Create Task Category</h5>
                         <button type="button" class="btn-close"
                             data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
                     <div class="modal-body">
-                        <div id="formErrors" class="alert alert-danger d-none"></div>
+                        <div id="create-formErrors" class="alert alert-danger d-none"></div>
 
                         <div class="mb-3">
-                            <label for="name" class="form-label">Category Name</label>
-                            <input type="text" name="name" id="name"
+                            <label for="create-name" class="form-label">Category Name</label>
+                            <input type="text" name="name" id="create-name"
                                 class="form-control" required minlength="4" maxlength="30">
                         </div>
 
                         <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea name="description" id="description"
+                            <label for="create-description" class="form-label">Description</label>
+                            <textarea name="description" id="create-description"
                                 class="form-control" required minlength="4" maxlength="30"></textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label for="is_active" class="form-label">Status</label>
-                            <select name="is_active" id="is_active" class="form-select" required>
+                            <label for="create-is_active" class="form-label">Status</label>
+                            <select name="is_active" id="create-is_active" class="form-select" required>
                                 <option value="1">Active</option>
                                 <option value="0">Inactive</option>
                             </select>
@@ -77,7 +77,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary"
                             data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" id="saveCategory"
+                        <button type="submit" id="saveCreateCategory"
                             class="btn btn-primary">Save</button>
                     </div>
                 </form>
@@ -85,6 +85,56 @@
         </div>
     </div>
 
+    <!-- Edit Modal -->
+    <div class="modal fade" id="edit-taskCategory-modal" tabindex="-1"
+        aria-labelledby="editModalTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="edit-taskCategory-form">
+                    @csrf
+
+                    <input type="hidden" id="edit-category_id">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalTitle">Edit Task Category</h5>
+                        <button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div id="edit-formErrors" class="alert alert-danger d-none"></div>
+
+                        <div class="mb-3">
+                            <label for="edit-name" class="form-label">Category Name</label>
+                            <input type="text" name="name" id="edit-name"
+                                class="form-control" required minlength="4" maxlength="30">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="edit-description" class="form-label">Description</label>
+                            <textarea name="description" id="edit-description"
+                                class="form-control" required minlength="4" maxlength="30"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="edit-is_active" class="form-label">Status</label>
+                            <select name="is_active" id="edit-is_active" class="form-select" required>
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="saveEditCategory"
+                            class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Delete Confirmation Modal -->
     <x-delete-confirmation-modal
@@ -98,8 +148,17 @@
     @push('scripts')
         <script>
             $(document).ready(function () {
-                const modalElement = document.getElementById('taskCategoryModal');
-                const modal = new bootstrap.Modal(modalElement);
+                const createModalElement = document.getElementById('create-taskCategory-modal');
+                const createModal = new bootstrap.Modal(createModalElement);
+
+                const editModalElement = document.getElementById('edit-taskCategory-modal');
+                const editModal = new bootstrap.Modal(editModalElement);
+
+                const deleteModalElement = document.getElementById('deleteCategoryModal');
+                const deleteModal = new bootstrap.Modal(deleteModalElement);
+
+                let deleteCategoryId = null;
+                let deleteButton = null;
 
                 const table = $('.datatable').DataTable({
                     processing: true,
@@ -128,203 +187,197 @@
                     ]
                 });
 
-                function resetForm() {
-                    $('#taskCategoryForm')[0].reset();
-                    $('#category_id').val('');
-                    $('#formErrors').addClass('d-none').empty();
+                function resetCreateForm() {
+                    $('#create-taskCategory-form')[0].reset();
+                    $('#create-category_id').val('');
+                    $('#create-formErrors').addClass('d-none').empty();
+                }
+
+                function resetEditForm() {
+                    $('#edit-taskCategory-form')[0].reset();
+                    $('#edit-category_id').val('');
+                    $('#edit-formErrors').addClass('d-none').empty();
                 }
 
                 // Open modal for Create
-                $('#create-taskCategory').on('click', function () {
-                    resetForm();
-                    $('#modalTitle').text('Create Task Category');
-                    $('#saveCategory').text('Create');
-                    modal.show();
+                $('#create-taskCategory').on('click', function (e) {
+                    e.preventDefault();
+                    resetCreateForm();
+                    createModal.show();
                 });
-
 
                 // Open modal and load data for Edit
                 $('.datatable').on('click', '.edit-taskCategory', function (e) {
                     e.preventDefault();
 
-                    const button = $(this);
-
-                    // Prevent spam clicks
-                    if (button.data('loading')) {
+                    if ($('#saveEditCategory').prop('disabled')) {
                         return;
                     }
 
-                    button.data('loading', true);
-                    button.prop('disabled', true);
+                    const id = $(this).data('id');
 
-                    const originalText = button.text();
-                    button.text('Loading...');
-
-                    const id = button.data('id');
-
-                    resetForm();
+                    resetEditForm();
 
                     $.ajax({
-                        url: `/task-categories/${id}/data`,
+                        url: `/task-categories/${id}/edit`,
                         method: 'GET',
 
-                        success: function (category) {
-                            $('#category_id').val(category.id);
-                            $('#name').val(category.name);
-                            $('#description').val(category.description);
-                            $('#is_active').val(String(category.is_active));
+                        success: function (data) {
+                            $('#edit-category_id').val(data.id);
+                            $('#edit-name').val(data.name);
+                            $('#edit-description').val(data.description);
+                            $('#edit-is_active').val(data.is_active);
 
-                            $('#modalTitle').text('Edit Task Category');
-                            $('#saveCategory').text('Update');
-
-                            modal.show();
+                            editModal.show();
                         },
-
-                        error: function () {
-                            alert('Unable to load task category.');
-                        },
-
-                        complete: function () {
-                            // Re-enable the button when the request finishes
-                            button.prop('disabled', false);
-                            button.text(originalText);
-                            button.removeData('loading');
-                        }
+                        error: function () { alert('Unable to load data.'); }
                     });
                 });
 
-
-                // Create or Update
-                $('#taskCategoryForm').on('submit', function (e) {
+                // Create form submit
+                $('#create-taskCategory-form').on('submit', function (e) {
                     e.preventDefault();
 
-                    const id = $('#category_id').val();
-                    const url = id
-                        ? `/task-categories/${id}`
-                        : '{{ route("task-categories.store") }}';
-
-                    const method = id ? 'PUT' : 'POST';
-
-                    $('#formErrors').addClass('d-none').empty();
-                    $('#saveCategory').prop('disabled', true).text('Saving...');
+                    $('#create-formErrors').addClass('d-none').empty();
+                    $('#saveCreateCategory').prop('disabled', true).text('Saving...');
 
                     $.ajax({
-                        url: url,
-                        method: method,
+                        url: '{{ route("task-categories.store") }}',
+                        method: 'POST',
                         data: $(this).serialize(),
-
                         success: function (response) {
-                            modal.hide();
+                            createModal.hide();
                             table.ajax.reload(null, false);
-
                             $('#successMessage')
                                 .text(response.message)
                                 .removeClass('d-none');
-
-                            setTimeout(function () {
-                                $('#successMessage').addClass('d-none');
-                            }, 3000);
                         },
-
                         error: function (xhr) {
                             if (xhr.status === 422) {
-                                const errors = xhr.responseJSON.errors;
                                 let messages = '';
-
+                                const errors = xhr.responseJSON.errors;
                                 Object.values(errors).forEach(function (fieldErrors) {
                                     fieldErrors.forEach(function (message) {
                                         messages += `<div>${message}</div>`;
                                     });
                                 });
-
-                                $('#formErrors')
+                                $('#create-formErrors')
                                     .html(messages)
                                     .removeClass('d-none');
                             } else {
                                 alert(xhr.responseJSON?.message || 'Unable to save category.');
                             }
                         },
-
                         complete: function () {
-                            $('#saveCategory')
+                            $('#saveCreateCategory')
                                 .prop('disabled', false)
-                                .text(id ? 'Update' : 'Create');
+                                .text('Save');
                         }
                     });
                 });
 
+                // Edit form submit
+                $('#edit-taskCategory-form').on('submit', function (e) {
+                    e.preventDefault();
 
-            // Soft-delete using Bootstrap confirmation modal
-            const deleteModalElement = document.getElementById('deleteCategoryModal');
-            const deleteModal = new bootstrap.Modal(deleteModalElement);
+                    const id = $('#edit-category_id').val();
 
-            let deleteCategoryId = null;
-            let deleteButton = null;
+                    $('#edit-formErrors').addClass('d-none').empty();
+                    $('#saveEditCategory').prop('disabled', true).text('Saving...');
 
-            // Open confirmation modal
-            $('.datatable').on('click', '.delete-taskCategory', function (e) {
-                e.preventDefault();
+                    $.ajax({
+                        url: `/task-categories/${id}`,
+                        method: 'PUT',
+                        data: $(this).serialize(),
+                        success: function (response) {
+                            editModal.hide();
+                            table.ajax.reload(null, false);
+                            $('#successMessage')
+                                .text(response.message)
+                                .removeClass('d-none');
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                let messages = '';
+                                const errors = xhr.responseJSON.errors;
+                                Object.values(errors).forEach(function (fieldErrors) {
+                                    fieldErrors.forEach(function (message) {
+                                        messages += `<div>${message}</div>`;
+                                    });
+                                });
+                                $('#edit-formErrors')
+                                    .html(messages)
+                                    .removeClass('d-none');
+                            } else {
+                                alert(xhr.responseJSON?.message || 'Unable to save category.');
+                            }
+                        },
+                        complete: function () {
+                            $('#saveEditCategory')
+                                .prop('disabled', false)
+                                .text('Save');
+                        }
+                    });
+                });
 
-                // Prevent repeated clicks while deleting
-                if ($('#confirmDeleteCategory').prop('disabled')) {
-                    return;
-                }
+                // Soft-delete using Bootstrap confirmation modal
+                $('.datatable').on('click', '.delete-taskCategory', function (e) {
+                    e.preventDefault();
 
-                deleteCategoryId = $(this).data('id');
-                deleteButton = $(this);
-
-                deleteModal.show();
-            });
-
-            // Confirm deletion
-            $('#confirmDeleteCategory').on('click', function () {
-                if (!deleteCategoryId) {
-                    return;
-                }
-
-                const button = $(this);
-
-                // Prevent duplicate delete requests
-                if (button.prop('disabled')) {
-                    return;
-                }
-
-                button.prop('disabled', true).text('Deleting...');
-
-                $.ajax({
-                    url: `/task-categories/${deleteCategoryId}`,
-                    method: 'DELETE',
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    },
-
-                    success: function (response) {
-                        deleteModal.hide();
-
-                        table.ajax.reload(null, false);
-
-                        $('#successMessage')
-                            .text(response.message)
-                            .removeClass('d-none');
-                    },
-
-                    error: function (xhr) {
-                        alert(
-                            xhr.responseJSON?.message ||
-                            'Unable to delete category.'
-                        );
-                    },
-
-                    complete: function () {
-                        button.prop('disabled', false).text('Delete');
-
-                        deleteCategoryId = null;
-                        deleteButton = null;
+                    if ($('#confirmDeleteCategory').prop('disabled')) {
+                        return;
                     }
+
+                    deleteCategoryId = $(this).data('id');
+                    deleteButton = $(this);
+
+                    deleteModal.show();
+                });
+
+                // Confirm deletion
+                $('#confirmDeleteCategory').on('click', function () {
+                    if (!deleteCategoryId) {
+                        return;
+                    }
+
+                    const button = $(this);
+
+                    if (button.prop('disabled')) {
+                        return;
+                    }
+
+                    button.prop('disabled', true).text('Deleting...');
+
+                    $.ajax({
+                        url: `/task-categories/${deleteCategoryId}`,
+                        method: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+
+                        success: function (response) {
+                            deleteModal.hide();
+
+                            table.ajax.reload(null, false);
+
+                            $('#successMessage')
+                                .text(response.message)
+                                .removeClass('d-none');
+                        },
+                        error: function (xhr) {
+                            alert(
+                                xhr.responseJSON?.message || 'Unable to delete category.'
+                            );
+                        },
+                        complete: function () {
+                            button.prop('disabled', false).text('Delete');
+
+                            deleteCategoryId = null;
+                            deleteButton = null;
+                        }
+                    });
                 });
             });
-
-            });
         </script>
-    @endpush
-</x-app-layout>
+    @endpush</x-app-layout>
+

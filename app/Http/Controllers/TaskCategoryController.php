@@ -16,8 +16,8 @@ class TaskCategoryController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('permission:view task categories', only: ['index']),
-            new Middleware('permission:create task categories', only: ['store']),
-            new Middleware('permission:edit task categories', only: ['show', 'update']),
+            new Middleware('permission:create task categories', only: ['create', 'store']),
+            new Middleware('permission:edit task categories', only: ['edit', 'update']),
             new Middleware('permission:delete task categories', only: ['destroy']),
         ];
     }
@@ -68,13 +68,15 @@ class TaskCategoryController extends Controller implements HasMiddleware
         return view('task-categories.index');
     }
 
-    // Return category data for editing; null ID means create
-    public function show($id = null)
+    // Return reference data for creating a category.
+    public function create()
     {
-        if (!$id) {
-            return response()->json([]);
-        }
+        return response()->json([]);
+    }
 
+    // Return category data for editing
+    public function edit($id)
+    {
         $category = TaskCategory::findById($id);
 
         if (!$category) {
