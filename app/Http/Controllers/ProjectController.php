@@ -68,11 +68,12 @@ class ProjectController extends Controller implements HasMiddleware
     {
         $validated = $this->validateProject($request);
 
-        Project::createProject($validated, auth()->id());
+        $projectId = Project::createProject($validated, auth()->id());
 
         return response()->json([
             'status'  => 'success',
             'message' => 'Project created successfully.',
+            'project' => ['id' => $projectId],
         ]);
     }
 

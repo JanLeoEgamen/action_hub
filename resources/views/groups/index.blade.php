@@ -254,4 +254,5 @@
                 });
             });
         </script>
-    @endpush</x-app-layout>
+    @endpush
+</x-app-layout>

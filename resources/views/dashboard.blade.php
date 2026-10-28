@@ -127,56 +127,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <div class="card h-100">
-                                                <div class="card-header fw-semibold bg-light">
-                                                    My Projects by Status
-                                                </div>
-                                                <div class="card-body">
-                                                    <canvas id="chart-my-proj-status" height="300"></canvas>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="card h-100">
-                                                <div class="card-header fw-semibold bg-light">
-                                                    My Projects Created per Month
-                                                </div>
-                                                <div class="card-body">
-                                                    <canvas id="chart-my-proj-monthly" height="300"></canvas>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="card h-100">
-                                                <div class="card-header fw-semibold bg-light">
-                                                    My Tickets by Status
-                                                </div>
-                                                <div class="card-body">
-                                                    <canvas id="chart-my-ticket-status" height="300"></canvas>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="card h-100">
-                                                <div class="card-header fw-semibold bg-light">
-                                                    My Tickets Created per Month
-                                                </div>
-                                                <div class="card-body">
-                                                    <canvas id="chart-my-ticket-monthly" height="300"></canvas>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="card h-100">
-                                                <div class="card-header fw-semibold bg-light">
-                                                    My Tickets by Priority
-                                                </div>
-                                                <div class="card-body">
-                                                    <canvas id="chart-my-ticket-priority" height="300"></canvas>
-                                                </div>
-                                            </div>
-                                        </div>
+
                                     </div>
                                 </div>
                             @endcan
@@ -566,89 +517,7 @@
                                 },
                             },
                         });
-                        // Projects
-                        createChart(tabName + '-proj-status', document.getElementById('chart-my-proj-status').getContext('2d'), {
-                            type: 'doughnut',
-                            data: {
-                                labels: data.projects.status.labels,
-                                datasets: data.projects.status.datasets,
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    title: { display: true, text: 'My Projects by Status' },
-                                    legend: { position: 'bottom' },
-                                },
-                            },
-                        });
-                        createChart(tabName + '-proj-monthly', document.getElementById('chart-my-proj-monthly').getContext('2d'), {
-                            type: 'bar',
-                            data: {
-                                labels: data.projects.monthly.labels,
-                                datasets: data.projects.monthly.datasets,
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    title: { display: true, text: 'My Projects Created per Month' },
-                                    legend: { display: false },
-                                },
-                                scales: {
-                                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
-                                },
-                            },
-                        });
-                        // Tickets
-                        createChart(tabName + '-ticket-status', document.getElementById('chart-my-ticket-status').getContext('2d'), {
-                            type: 'doughnut',
-                            data: {
-                                labels: data.tickets.status.labels,
-                                datasets: data.tickets.status.datasets,
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    title: { display: true, text: 'My Tickets by Status' },
-                                    legend: { position: 'bottom' },
-                                },
-                            },
-                        });
-                        createChart(tabName + '-ticket-monthly', document.getElementById('chart-my-ticket-monthly').getContext('2d'), {
-                            type: 'bar',
-                            data: {
-                                labels: data.tickets.monthly.labels,
-                                datasets: data.tickets.monthly.datasets,
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    title: { display: true, text: 'My Tickets Created per Month' },
-                                    legend: { display: false },
-                                },
-                                scales: {
-                                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
-                                },
-                            },
-                        });
-                        createChart(tabName + '-ticket-priority', document.getElementById('chart-my-ticket-priority').getContext('2d'), {
-                            type: 'doughnut',
-                            data: {
-                                labels: data.tickets.priority.labels,
-                                datasets: data.tickets.priority.datasets,
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    title: { display: true, text: 'My Tickets by Priority' },
-                                    legend: { position: 'bottom' },
-                                },
-                            },
-                        });
+
                         break;
 
                     case 'project-overview':

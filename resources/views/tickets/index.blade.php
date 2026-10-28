@@ -1,7 +1,7 @@
 ﻿<x-app-layout>
     <x-slot name="header">
         <x-page-header
-            title="{{ $project->name }} â€” Tickets"
+            title="{{ $project->name }}"
             action-label="Create"
             action-id="create-ticket"
             permission="create tickets"
@@ -304,7 +304,7 @@
                     };
 
                     $.ajax({
-                        url: '{{ route("projects.tickets.board", ["projectId" => PROJECT_ID]) }}',
+                        url: '{{ route("projects.tickets.board", ["projectId" => $project->id]) }}',
                         method: 'GET',
                         data: params,
                         success: function (response) {
@@ -564,5 +564,6 @@
                 loadBoard();
             });
         </script>
-    @endpush</x-app-layout>
+    @endpush
+</x-app-layout>
 

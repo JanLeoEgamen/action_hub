@@ -144,27 +144,7 @@ class Project extends Model
         $projects = [];
 
         foreach ($rows as $row) {
-            $actions = '';
-
-            if ($user->can('edit projects')) {
-                $actions .= '
-                    <button type="button"
-                        data-id="' . $row->id . '"
-                        class="btn btn-success btn-sm edit-project">
-                        Edit
-                    </button> ';
-            }
-
-            if ($user->can('delete projects')) {
-                $actions .= '
-                    <button type="button"
-                        data-id="' . $row->id . '"
-                        class="btn btn-danger btn-sm delete-project">
-                        Delete
-                    </button> ';
-            }
-
-            $actions .= '
+            $actions = '
                 <a href="' . route('projects.tickets', $row->id) . '"
                     class="btn btn-primary btn-sm">
                     Open Board

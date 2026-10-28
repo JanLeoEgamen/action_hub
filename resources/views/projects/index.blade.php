@@ -319,6 +319,7 @@
                                         <div class="mt-auto d-flex gap-2">
                                             <button type="button" class="btn btn-sm btn-success edit-project" data-id="${p.id}">Edit</button>
                                             <button type="button" class="btn btn-sm btn-danger delete-project" data-id="${p.id}">Delete</button>
+                                            ${p.action}
                                         </div>
                                     </div>
                                 </div>
@@ -401,7 +402,11 @@
                         success: function (response) {
                             createModal.hide();
                             showSuccess(response.message);
-                            loadList();
+                            if (response.project && response.project.id) {
+                                window.location.href = "{{ route('projects.tickets', ['projectId' => '__ID__']) }}".replace('__ID__', response.project.id);
+                            } else {
+                                loadList();
+                            }
                         },
                         error: function (xhr) {
                             if (xhr.status === 422) {
@@ -507,4 +512,5 @@
                 loadList();
             });
         </script>
-    @endpush</x-app-layout>
+    @endpush
+</x-app-layout>

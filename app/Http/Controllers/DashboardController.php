@@ -34,7 +34,7 @@ class DashboardController extends Controller implements HasMiddleware
     {
         $userId = auth()->id();
 
-        // own user
+        // own task
         $taskStatusRows = Task::getPersonalStatusCounts($userId);
         $taskMonthRows = Task::getPersonalMonthlyCounts($userId);
         $taskCategoryRows = Task::getPersonalCategoryCounts($userId);
@@ -70,9 +70,7 @@ class DashboardController extends Controller implements HasMiddleware
             $categoryData[] = (int) $row->total;
         }
 
-        // ---------------------------------------------------------------
-        // Projects (personal: owned by or member of the user)
-        // ---------------------------------------------------------------
+        // own project ticket
         $projStatusRows = Project::getPersonalStatusCounts($userId);
         $projMonthRows = Project::getPersonalMonthlyCounts($userId);
         $projTotals = Project::getPersonalTotals($userId);
@@ -93,9 +91,7 @@ class DashboardController extends Controller implements HasMiddleware
             $projData[] = $row ? (int) $row->total : 0;
         }
 
-        // ---------------------------------------------------------------
-        // Tickets (personal: on projects owned by or with the user as member)
-        // ---------------------------------------------------------------
+        // own user tickets
         $ticketStatusRows = Ticket::getPersonalStatusCounts($userId);
         $ticketMonthRows = Ticket::getPersonalMonthlyCounts($userId);
         $ticketPriorityRows = Ticket::getPersonalPriorityCounts($userId);

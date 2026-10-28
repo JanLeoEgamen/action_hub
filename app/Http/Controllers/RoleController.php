@@ -133,6 +133,7 @@ class RoleController extends Controller implements HasMiddleware
     public function store(Request $request)
     {
         $validated = $this->validateRole($request);
+        $guard = config('auth.defaults.guard');
 
         $role = Role::create([
             'name' => $validated['name'],
