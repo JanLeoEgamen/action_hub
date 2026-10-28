@@ -65,12 +65,7 @@ class DepartmentController extends Controller implements HasMiddleware
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'company_id' => 'required|integer|exists:companies,id',
-            'department_name' => 'required|string|max:255',
-            'department_description' => 'nullable|string',
-            'is_active' => 'boolean'
-        ]);
+        $validated = $this->validateDepartment($request);
 
         Department::createDepartment($validated);
 
@@ -81,16 +76,21 @@ class DepartmentController extends Controller implements HasMiddleware
     {
         if (!Department::existsById($id)) return response()->json(['message' => 'Department not found.'], 404);
 
-        $validated = $request->validate([
+        $validated = $this->validateDepartment($request);
+
+        Department::updateDepartment($id, $validated);
+
+        return response()->json(['status' => 'success', 'message' => 'Department updated successfully.']);
+    }
+
+    private function validateDepartment(Request $request): array
+    {
+        return $request->validate([
             'company_id' => 'required|integer|exists:companies,id',
             'department_name' => 'required|string|max:255',
             'department_description' => 'nullable|string',
             'is_active' => 'boolean'
         ]);
-
-        Department::updateDepartment($id, $validated);
-
-        return response()->json(['status' => 'success', 'message' => 'Department updated successfully.']);
     }
 
     public function destroy($id)

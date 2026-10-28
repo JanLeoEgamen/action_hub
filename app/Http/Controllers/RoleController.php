@@ -132,30 +132,7 @@ class RoleController extends Controller implements HasMiddleware
     // Create role
     public function store(Request $request)
     {
-        $guard = config('auth.defaults.guard');
-
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'between:4,30',
-                Rule::unique('roles', 'name')
-                    ->where('guard_name', $guard),
-            ],
-            'permission' => 'sometimes|array',
-            'permission.*' => [
-                'required',
-                'string',
-                Rule::exists('permissions', 'name')
-                    ->where('guard_name', $guard),
-            ],
-        ], [
-            'name.required' => 'Please enter the role name.',
-            'name.between' => 'The role name must be between 4 and 30 characters.',
-            'name.unique' => 'This role name already exists.',
-            'permission.array' => 'Invalid permissions submitted.',
-            'permission.*.exists' => 'One or more selected permissions are invalid.',
-        ]);
+        $validated = $this->validateRole($request);
 
         $role = Role::create([
             'name' => $validated['name'],
@@ -181,29 +158,7 @@ class RoleController extends Controller implements HasMiddleware
             ], 404);
         }
 
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'between:4,30',
-                Rule::unique('roles', 'name')
-                    ->where('guard_name', $role->guard_name)
-                    ->ignore($role->id),
-            ],
-            'permission' => 'sometimes|array',
-            'permission.*' => [
-                'required',
-                'string',
-                Rule::exists('permissions', 'name')
-                    ->where('guard_name', $role->guard_name),
-            ],
-        ], [
-            'name.required' => 'Please enter the role name.',
-            'name.between' => 'The role name must be between 4 and 30 characters.',
-            'name.unique' => 'This role name already exists.',
-            'permission.array' => 'Invalid permissions submitted.',
-            'permission.*.exists' => 'One or more selected permissions are invalid.',
-        ]);
+        $validated = $this->validateRole($request, $id);
 
         $role->update([
             'name' => $validated['name'],
@@ -215,6 +170,35 @@ class RoleController extends Controller implements HasMiddleware
         return response()->json([
             'status' => 'success',
             'message' => 'Role updated successfully.',
+        ]);
+    }
+
+    private function validateRole(Request $request, $id = null): array
+    {
+        $guard = config('auth.defaults.guard');
+
+        return $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'between:4,30',
+                Rule::unique('roles', 'name')
+                    ->where('guard_name', $guard)
+                    ->when($id, fn ($rule) => $rule->ignore($id)),
+            ],
+            'permission' => 'sometimes|array',
+            'permission.*' => [
+                'required',
+                'string',
+                Rule::exists('permissions', 'name')
+                    ->where('guard_name', $guard),
+            ],
+        ], [
+            'name.required' => 'Please enter the role name.',
+            'name.between' => 'The role name must be between 4 and 30 characters.',
+            'name.unique' => 'This role name already exists.',
+            'permission.array' => 'Invalid permissions submitted.',
+            'permission.*.exists' => 'One or more selected permissions are invalid.',
         ]);
     }
 

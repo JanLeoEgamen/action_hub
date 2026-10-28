@@ -61,11 +61,7 @@ class CompanyController extends Controller implements HasMiddleware
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'company_name' => 'required|string|max:255',
-            'company_description' => 'nullable|string',
-            'is_active' => 'boolean'
-        ]);
+        $validated = $this->validateCompany($request);
 
         Company::createCompany($validated);
 
@@ -76,15 +72,20 @@ class CompanyController extends Controller implements HasMiddleware
     {
         if (!Company::existsById($id)) return response()->json(['message' => 'Company not found.'], 404);
 
-        $validated = $request->validate([
-            'company_name' => 'required|string|max:255',
-            'company_description' => 'nullable|string',
-            'is_active' => 'boolean'
-        ]);
+        $validated = $this->validateCompany($request);
 
         Company::updateCompany($id, $validated);
 
         return response()->json(['status' => 'success', 'message' => 'Company updated successfully.']);
+    }
+
+    private function validateCompany(Request $request): array
+    {
+        return $request->validate([
+            'company_name' => 'required|string|max:255',
+            'company_description' => 'nullable|string',
+            'is_active' => 'boolean'
+        ]);
     }
 
     public function destroy($id)

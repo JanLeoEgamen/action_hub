@@ -64,12 +64,7 @@ class GroupController extends Controller implements HasMiddleware
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'department_id' => 'required|integer|exists:departments,id',
-            'group_name' => 'required|string|max:255',
-            'group_description' => 'nullable|string',
-            'is_active' => 'boolean'
-        ]);
+        $validated = $this->validateGroup($request);
 
         Group::createGroup($validated);
 
@@ -80,16 +75,21 @@ class GroupController extends Controller implements HasMiddleware
     {
         if (!Group::existsById($id)) return response()->json(['message' => 'Group not found.'], 404);
 
-        $validated = $request->validate([
+        $validated = $this->validateGroup($request);
+
+        Group::updateGroup($id, $validated);
+
+        return response()->json(['status' => 'success', 'message' => 'Group updated successfully.']);
+    }
+
+    private function validateGroup(Request $request): array
+    {
+        return $request->validate([
             'department_id' => 'required|integer|exists:departments,id',
             'group_name' => 'required|string|max:255',
             'group_description' => 'nullable|string',
             'is_active' => 'boolean'
         ]);
-
-        Group::updateGroup($id, $validated);
-
-        return response()->json(['status' => 'success', 'message' => 'Group updated successfully.']);
     }
 
     public function destroy($id)

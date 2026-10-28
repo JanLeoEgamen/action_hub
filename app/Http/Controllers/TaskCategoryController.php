@@ -91,11 +91,7 @@ class TaskCategoryController extends Controller implements HasMiddleware
     // Create category
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|between:4,30',
-            'description' => 'required|string|between:4,30',
-            'is_active' => 'required|boolean',
-        ]);
+        $validated = $this->validateTaskCategory($request);
 
         TaskCategory::createCategory($validated);
 
@@ -108,11 +104,7 @@ class TaskCategoryController extends Controller implements HasMiddleware
     // Update category
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|between:4,30',
-            'description' => 'required|string|between:4,30',
-            'is_active' => 'required|boolean',
-        ]);
+        $validated = $this->validateTaskCategory($request);
 
         if (!TaskCategory::existsById($id)) {
             return response()->json([
@@ -125,6 +117,15 @@ class TaskCategoryController extends Controller implements HasMiddleware
         return response()->json([
             'status' => 'success',
             'message' => 'Task category updated successfully.',
+        ]);
+    }
+
+    private function validateTaskCategory(Request $request): array
+    {
+        return $request->validate([
+            'name' => 'required|string|between:4,30',
+            'description' => 'required|string|between:4,30',
+            'is_active' => 'required|boolean',
         ]);
     }
 

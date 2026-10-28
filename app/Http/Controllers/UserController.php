@@ -93,16 +93,7 @@ class UserController extends Controller implements HasMiddleware
     // Create a user
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:30',
-            'last_name' => 'required|string|between:4,30',
-            'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8|same:confirm_password',
-            'confirm_password' => 'required|string',
-            'roles' => 'required|array|min:1',
-            'roles.*' => 'required|integer|distinct|exists:roles,id',
-            'group_id' => 'nullable|integer|exists:groups,id',
-        ]);
+        $validated = $this->validateUser($request);
 
         $userId = User::createUser($validated);
 
@@ -127,21 +118,7 @@ class UserController extends Controller implements HasMiddleware
             ], 404);
         }
 
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:30',
-            'last_name' => 'required|string|between:4,30',
-            'email' => [
-                'required',
-                'email',
-                'max:255',
-                Rule::unique('users', 'email')->ignore($id),
-            ],
-            'password' => 'nullable|string|min:8|same:confirm_password',
-            'confirm_password' => 'required_with:password|nullable|string',
-            'roles' => 'required|array|min:1',
-            'roles.*' => 'required|integer|distinct|exists:roles,id',
-            'group_id' => 'nullable|integer|exists:groups,id', 
-        ]);
+        $validated = $this->validateUser($request, $id);
 
         User::updateUser($id, $validated);
 
@@ -154,6 +131,25 @@ class UserController extends Controller implements HasMiddleware
         return response()->json([
             'status' => 'success',
             'message' => 'User updated successfully.',
+        ]);
+    }
+
+    private function validateUser(Request $request, $id = null): array
+    {
+        return $request->validate([
+            'first_name' => 'required|string|max:30',
+            'last_name' => 'required|string|between:4,30',
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->when($id, fn ($rule) => $rule->ignore($id)),
+            ],
+            'password' => $id ? 'nullable|string|min:8|same:confirm_password' : 'required|string|min:8|same:confirm_password',
+            'confirm_password' => $id ? 'required_with:password|nullable|string' : 'required|string',
+            'roles' => 'required|array|min:1',
+            'roles.*' => 'required|integer|distinct|exists:roles,id',
+            'group_id' => 'nullable|integer|exists:groups,id',
         ]);
     }
 
