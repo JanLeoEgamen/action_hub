@@ -118,14 +118,23 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="create-category_id_form" class="form-label">Category</label>
-                                <select name="category_id" id="create-category_id_form"
-                                    class="form-select" required>
-                                    <option value="">Select category</option>
+                                <label class="form-label d-block">Category</label>
+                                <div id="create-category_ids" class="border rounded p-2"
+                                    style="max-height: 200px; overflow-y: auto;">
                                     @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        <div class="form-check">
+                                            <input class="form-check-input category-radio"
+                                                type="radio"
+                                                name="category_id"
+                                                value="{{ $category->id }}"
+                                                id="create-category_{{ $category->id }}">
+                                            <label class="form-check-label"
+                                                for="create-category_{{ $category->id }}">
+                                                {{ $category->name }}
+                                            </label>
+                                        </div>
                                     @endforeach
-                                </select>
+                                </div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="create-due_date" class="form-label">Due Date</label>
@@ -215,14 +224,23 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="edit-category_id_form" class="form-label">Category</label>
-                                <select name="category_id" id="edit-category_id_form"
-                                    class="form-select" required>
-                                    <option value="">Select category</option>
+                                <label class="form-label d-block">Category</label>
+                                <div id="edit-category_ids" class="border rounded p-2"
+                                    style="max-height: 200px; overflow-y: auto;">
                                     @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        <div class="form-check">
+                                            <input class="form-check-input category-radio"
+                                                type="radio"
+                                                name="category_id"
+                                                value="{{ $category->id }}"
+                                                id="edit-category_{{ $category->id }}">
+                                            <label class="form-check-label"
+                                                for="edit-category_{{ $category->id }}">
+                                                {{ $category->name }}
+                                            </label>
+                                        </div>
                                     @endforeach
-                                </select>
+                                </div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="edit-due_date" class="form-label">Due Date</label>
@@ -430,7 +448,8 @@
                             $('#edit-task_id').val(task.id);
                             $('#edit-title').val(task.title);
                             $('#edit-description').val(task.description);
-                            $('#edit-category_id_form').val(task.category_id);
+                            $('#edit-category_ids input[type="radio"]').prop('checked', false);
+                            $('#edit-category_ids input[type="radio"][value="' + task.category_id + '"]').prop('checked', true);
                             $('#edit-due_date').val(task.due_date);
                             $('#edit-status_form').val(task.status);
                             $('#edit-is_active').val(task.is_active ? '1' : '0');
@@ -593,6 +612,16 @@
                 });
 
                 // load the board initially
+
+                // Filter change handlers
+                $('#filter, #category_id, #status').on('change', loadBoard);
+                let searchDebounce;
+                $('#search').on('input', function () {
+                    clearTimeout(searchDebounce);
+                    searchDebounce = setTimeout(loadBoard, 300);
+                });
+                $('#overdue').on('change', loadBoard);
+
                 loadBoard();
             });
         </script>

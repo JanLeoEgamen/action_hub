@@ -118,17 +118,7 @@ class Task extends Model
                     ->whereNull('deleted_at');
             });
         } else {
-            // All task 
-            $query->where(function ($q) use ($currentUserId) {
-                $q->where('tasks.created_by', $currentUserId)
-                  ->orWhereIn('tasks.id', function ($sub) use ($currentUserId) {
-                      $sub->select('task_id')
-                          ->from('task_assignees')
-                          ->where('user_id', $currentUserId)
-                          ->where('is_active', 1)
-                          ->whereNull('deleted_at');
-                  });
-            });
+            // All tasks — show all active, non-deleted tasks (no user restriction)
         }
 
         // Optionals
@@ -541,9 +531,7 @@ class Task extends Model
                     'updated_at'  => now(),
                 ]);
 
-            if (array_key_exists('assignee_ids', $data)) {
-                TaskAssignee::syncForTask((int) $id, $data['assignee_ids'] ?? []);
-            }
+            TaskAssignee::syncForTask((int) $id, $data['assignee_ids'] ?? []);
         });
     }
 
