@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Spatie\Permission\Models\Role;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Carbon;
@@ -145,8 +146,8 @@ class UserController extends Controller implements HasMiddleware
                 'max:255',
                 Rule::unique('users', 'email')->when($id, fn ($rule) => $rule->ignore($id)),
             ],
-            'password' => $id ? 'nullable|string|min:8|same:confirm_password' : 'required|string|min:8|same:confirm_password',
-            'confirm_password' => $id ? 'required_with:password|nullable|string' : 'required|string',
+            'password' => $id ? ['nullable', 'string', Password::defaults(), 'same:confirm_password'] : ['required', 'string', Password::defaults(), 'same:confirm_password'],
+            'confirm_password' => $id ? ['required_with:password', 'nullable', 'string'] : ['required', 'string'],
             'roles' => 'required|array|min:1',
             'roles.*' => 'required|integer|distinct|exists:roles,id',
             'group_id' => 'nullable|integer|exists:groups,id',

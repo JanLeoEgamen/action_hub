@@ -72,109 +72,112 @@
 
 
 
+        @canany(['view companies', 'view departments', 'view groups'])
+            <x-sidebar-section label="{{ __('Organization') }}" />
 
-        <x-sidebar-section label="{{ __('Organization') }}" />
+            @can('view companies')
+                <a href="{{ route('companies.index') }}"
+                :title="collapsed ? {{ Illuminate\Support\Js::from(__('Company')) }} : null"
+                class="sidebar-rail-center group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 {{ request()->routeIs('companies.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}"
+                >
+                    <span class="shrink-0 [&>svg]:h-5 [&>svg]:w-5" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4.5 20.5V5.5a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v15" />
+                            <path d="M13.5 20.5V9.5h5a1 1 0 0 1 1 1v10" />
+                            <path d="M3 20.5h18" />
+                            <path d="M7.5 8h1.5M7.5 11.5h1.5M7.5 15h1.5" />
+                            <path d="M16 13h1M16 16.5h1" />
+                        </svg>
+                    </span>
+                    <span class="sidebar-hide-rail truncate">{{ __('Company') }}</span>
+                </a>
+            @endcan
 
-        @can('view companies')
-            <a href="{{ route('companies.index') }}"
-               :title="collapsed ? {{ Illuminate\Support\Js::from(__('Company')) }} : null"
-               class="sidebar-rail-center group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 {{ request()->routeIs('companies.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}"
-            >
-                <span class="shrink-0 [&>svg]:h-5 [&>svg]:w-5" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4.5 20.5V5.5a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v15" />
-                        <path d="M13.5 20.5V9.5h5a1 1 0 0 1 1 1v10" />
-                        <path d="M3 20.5h18" />
-                        <path d="M7.5 8h1.5M7.5 11.5h1.5M7.5 15h1.5" />
-                        <path d="M16 13h1M16 16.5h1" />
-                    </svg>
-                </span>
-                <span class="sidebar-hide-rail truncate">{{ __('Company') }}</span>
-            </a>
-        @endcan
+            @can('view departments')
+                <a href="{{ route('departments.index') }}"
+                :title="collapsed ? {{ Illuminate\Support\Js::from(__('Department')) }} : null"
+                class="sidebar-rail-center group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 {{ request()->routeIs('departments.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}"
+                >
+                    <span class="shrink-0 [&>svg]:h-5 [&>svg]:w-5" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="3.5" width="6" height="4.5" rx="1" />
+                            <rect x="3" y="15.5" width="6" height="4.5" rx="1" />
+                            <rect x="15" y="15.5" width="6" height="4.5" rx="1" />
+                            <path d="M12 8v2.5M6 15.5v-2.5h12v2.5" />
+                        </svg>
+                    </span>
+                    <span class="sidebar-hide-rail truncate">{{ __('Department') }}</span>
+                </a>
+            @endcan
 
-        @can('view departments')
-            <a href="{{ route('departments.index') }}"
-               :title="collapsed ? {{ Illuminate\Support\Js::from(__('Department')) }} : null"
-               class="sidebar-rail-center group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 {{ request()->routeIs('departments.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}"
-            >
-                <span class="shrink-0 [&>svg]:h-5 [&>svg]:w-5" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="9" y="3.5" width="6" height="4.5" rx="1" />
-                        <rect x="3" y="15.5" width="6" height="4.5" rx="1" />
-                        <rect x="15" y="15.5" width="6" height="4.5" rx="1" />
-                        <path d="M12 8v2.5M6 15.5v-2.5h12v2.5" />
-                    </svg>
-                </span>
-                <span class="sidebar-hide-rail truncate">{{ __('Department') }}</span>
-            </a>
-        @endcan
+            @can('view groups')
+                <a href="{{ route('groups.index') }}"
+                :title="collapsed ? {{ Illuminate\Support\Js::from(__('Group')) }} : null"
+                class="sidebar-rail-center group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 {{ request()->routeIs('groups.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}"
+                >
+                    <span class="shrink-0 [&>svg]:h-5 [&>svg]:w-5" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3.5" y="4.5" width="17" height="15" rx="3.5" />
+                            <circle cx="8.5" cy="12" r="1.35" />
+                            <circle cx="12" cy="12" r="1.35" />
+                            <circle cx="15.5" cy="12" r="1.35" />
+                        </svg>
+                    </span>
+                    <span class="sidebar-hide-rail truncate">{{ __('Group') }}</span>
+                </a>
+            @endcan
+        @endcanany
 
-        @can('view groups')
-            <a href="{{ route('groups.index') }}"
-               :title="collapsed ? {{ Illuminate\Support\Js::from(__('Group')) }} : null"
-               class="sidebar-rail-center group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 {{ request()->routeIs('groups.*') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}"
-            >
-                <span class="shrink-0 [&>svg]:h-5 [&>svg]:w-5" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3.5" y="4.5" width="17" height="15" rx="3.5" />
-                        <circle cx="8.5" cy="12" r="1.35" />
-                        <circle cx="12" cy="12" r="1.35" />
-                        <circle cx="15.5" cy="12" r="1.35" />
-                    </svg>
-                </span>
-                <span class="sidebar-hide-rail truncate">{{ __('Group') }}</span>
-            </a>
-        @endcan
+        @canany(['view users', 'view roles', 'view task categories'])
+            <x-sidebar-section label="{{ __('Configurations') }}" />
 
-        <x-sidebar-section label="{{ __('People and  Access') }}" />
+            @can('view users')
+                <a href="{{ route('users.index') }}"
+                :title="collapsed ? {{ Illuminate\Support\Js::from(__('Users')) }} : null"
+                class="sidebar-rail-center group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 {{ request()->routeIs('users.index') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}"
+                >
+                    <span class="shrink-0 [&>svg]:h-5 [&>svg]:w-5" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="9.5" cy="8.5" r="3.5" />
+                            <path d="M3.5 20.2c0-3.3 2.7-6 6-6s6 2.7 6 6" />
+                            <path d="M16.2 6.4a3.5 3.5 0 0 1 0 6.4" />
+                            <path d="M17.6 14.6c1.8 1 2.9 2.8 2.9 4.8" />
+                        </svg>
+                    </span>
+                    <span class="sidebar-hide-rail truncate">{{ __('Users') }}</span>
+                </a>
+            @endcan
 
-        @can('view users')
-            <a href="{{ route('users.index') }}"
-               :title="collapsed ? {{ Illuminate\Support\Js::from(__('Users')) }} : null"
-               class="sidebar-rail-center group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 {{ request()->routeIs('users.index') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}"
-            >
-                <span class="shrink-0 [&>svg]:h-5 [&>svg]:w-5" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="9.5" cy="8.5" r="3.5" />
-                        <path d="M3.5 20.2c0-3.3 2.7-6 6-6s6 2.7 6 6" />
-                        <path d="M16.2 6.4a3.5 3.5 0 0 1 0 6.4" />
-                        <path d="M17.6 14.6c1.8 1 2.9 2.8 2.9 4.8" />
-                    </svg>
-                </span>
-                <span class="sidebar-hide-rail truncate">{{ __('Users') }}</span>
-            </a>
-        @endcan
+            @can('view roles')
+                <a href="{{ route('roles.index') }}"
+                :title="collapsed ? {{ Illuminate\Support\Js::from(__('Roles')) }} : null"
+                class="sidebar-rail-center group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 {{ request()->routeIs('roles.index') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}"
+                >
+                    <span class="shrink-0 [&>svg]:h-5 [&>svg]:w-5" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 3.25l7 2.5v6.1c0 4.05-2.9 7.3-7 8.65-4.1-1.35-7-4.6-7-8.65v-6.1l7-2.5z" />
+                            <path d="M9.25 12l1.9 1.9 3.6-3.9" />
+                        </svg>
+                    </span>
+                    <span class="sidebar-hide-rail truncate">{{ __('Roles') }}</span>
+                </a>
+            @endcan
 
-        @can('view roles')
-            <a href="{{ route('roles.index') }}"
-               :title="collapsed ? {{ Illuminate\Support\Js::from(__('Roles')) }} : null"
-               class="sidebar-rail-center group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 {{ request()->routeIs('roles.index') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}"
-            >
-                <span class="shrink-0 [&>svg]:h-5 [&>svg]:w-5" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 3.25l7 2.5v6.1c0 4.05-2.9 7.3-7 8.65-4.1-1.35-7-4.6-7-8.65v-6.1l7-2.5z" />
-                        <path d="M9.25 12l1.9 1.9 3.6-3.9" />
-                    </svg>
-                </span>
-                <span class="sidebar-hide-rail truncate">{{ __('Roles') }}</span>
-            </a>
-        @endcan
-
-        @can('view task categories')
-            <a href="{{ route('task-categories.index') }}"
-               :title="collapsed ? {{ Illuminate\Support\Js::from(__('Task categories')) }} : null"
-               class="sidebar-rail-center group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 {{ request()->routeIs('task-categories.index') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}"
-            >
-                <span class="shrink-0 [&>svg]:h-5 [&>svg]:w-5" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12.6 3.5H20a.5.5 0 0 1 .5.5v7.4a2 2 0 0 1-.6 1.4l-7.6 7.6a2 2 0 0 1-2.8 0l-5.4-5.4a2 2 0 0 1 0-2.8l7.6-7.6a2 2 0 0 1 1.4-.6z" />
-                        <circle cx="16.5" cy="7.5" r="1.25" />
-                    </svg>
-                </span>
-                <span class="sidebar-hide-rail truncate">{{ __('Task categories') }}</span>
-            </a>
-        @endcan
+            @can('view task categories')
+                <a href="{{ route('task-categories.index') }}"
+                :title="collapsed ? {{ Illuminate\Support\Js::from(__('Task categories')) }} : null"
+                class="sidebar-rail-center group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 {{ request()->routeIs('task-categories.index') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}"
+                >
+                    <span class="shrink-0 [&>svg]:h-5 [&>svg]:w-5" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12.6 3.5H20a.5.5 0 0 1 .5.5v7.4a2 2 0 0 1-.6 1.4l-7.6 7.6a2 2 0 0 1-2.8 0l-5.4-5.4a2 2 0 0 1 0-2.8l7.6-7.6a2 2 0 0 1 1.4-.6z" />
+                            <circle cx="16.5" cy="7.5" r="1.25" />
+                        </svg>
+                    </span>
+                    <span class="sidebar-hide-rail truncate">{{ __('Task categories') }}</span>
+                </a>
+            @endcan
+        @endcanany
 
         @can('view tasks')
             <a href="{{ route('tasks.index') }}"
