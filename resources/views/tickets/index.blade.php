@@ -165,6 +165,25 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="mb-3">
+                            <label class="form-label d-block">Assignees</label>
+                            <div id="create-assignee_ids" class="border rounded p-2"
+                                style="max-height: 200px; overflow-y: auto;">
+                                @foreach ($users as $user)
+                                    <div class="form-check">
+                                        <input class="form-check-input assignee-checkbox"
+                                            type="checkbox"
+                                            name="assignee_ids[]"
+                                            value="{{ $user->id }}"
+                                            id="create-assignee_{{ $user->id }}">
+                                        <label class="form-check-label" for="create-assignee_{{ $user->id }}">
+                                            {{ $user->first_name }} {{ $user->last_name }}
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
 
                     <div class="modal-footer">
@@ -246,6 +265,25 @@
                                         name="is_active" id="edit-is_active" value="1" checked>
                                     <label class="form-check-label" for="edit-is_active">Active</label>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label d-block">Assignees</label>
+                            <div id="edit-assignee_ids" class="border rounded p-2"
+                                style="max-height: 200px; overflow-y: auto;">
+                                @foreach ($users as $user)
+                                    <div class="form-check">
+                                        <input class="form-check-input assignee-checkbox"
+                                            type="checkbox"
+                                            name="assignee_ids[]"
+                                            value="{{ $user->id }}"
+                                            id="edit-assignee_{{ $user->id }}">
+                                        <label class="form-check-label" for="edit-assignee_{{ $user->id }}">
+                                            {{ $user->first_name }} {{ $user->last_name }}
+                                        </label>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>
@@ -349,6 +387,7 @@
                                         <p class="card-text text-muted small">${escapeHtml(ticket.description || '')}</p>
                                         <small class="text-muted">Label: ${escapeHtml(ticket.label)} | Priority: ${escapeHtml(ticket.priority)}</small><br>
                                         ${ticket.due_date ? `<small class="text-muted">Due: ${escapeHtml(ticket.due_date)}</small><br>` : ''}
+                                        ${ticket.assignee_names ? `<small class="text-info">Assignee: ${escapeHtml(ticket.assignee_names)}</small><br>` : ''}
                                         <button type="button" class="btn btn-sm btn-success edit-ticket" data-id="${ticket.id}">Edit</button>
                                         <button type="button" class="btn btn-sm btn-danger delete-ticket" data-id="${ticket.id}">Delete</button>
                                     </div>
@@ -362,12 +401,14 @@
                 function resetCreateForm() {
                     $('#create-ticket-form')[0].reset();
                     $('#create-ticket_id').val('');
+                    $('#create-assignee_ids input[type="checkbox"]').prop('checked', false);
                     $('#create-formErrors').addClass('d-none').empty();
                 }
 
                 function resetEditForm() {
                     $('#edit-ticket-form')[0].reset();
                     $('#edit-ticket_id').val('');
+                    $('#edit-assignee_ids input[type="checkbox"]').prop('checked', false);
                     $('#edit-formErrors').addClass('d-none').empty();
                 }
 
@@ -399,6 +440,10 @@
                             $('#edit-status_form').val(ticket.status);
                             $('#edit-due_date').val(ticket.due_date);
                             $('#edit-is_active').prop('checked', !!ticket.is_active);
+                            $('#edit-assignee_ids input[type="checkbox"]').prop('checked', false);
+                            (ticket.assignee_ids || []).forEach(function (uid) {
+                                $('#edit-assignee_ids input[type="checkbox"][value="' + uid + '"]').prop('checked', true);
+                            });
                             editModal.show();
                         },
                         error: function (xhr) {

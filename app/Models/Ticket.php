@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
 
 class Ticket extends Model
@@ -35,11 +36,42 @@ class Ticket extends Model
         return $this->belongsTo(Project::class);
     }
 
+    public function assignees(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'ticket_assignees',
+            'ticket_id',
+            'user_id'
+        )
+            ->withPivot(['id', 'is_active', 'deleted_at'])
+            ->withTimestamps();
+    }
+
+    // ---------------------------------------------------------------
+    // Dropdown sources
+    // ---------------------------------------------------------------
+
+    // list for users assignment
+    public static function getUsersForAssignment()
+    {
+        return DB::table('users')
+            ->select('id', 'first_name', 'last_name')
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get();
+    }
+
     // kanban board tickets
     public static function getBoardTickets(int $projectId, array $filters): array
     {
         $query = DB::table('tickets')
-            ->leftJoin('users as creators', 'creators.id', '=', 'tickets.project_id') // placeholder join
+            ->leftJoin('ticket_assignees', function ($join) {
+                $join->on('ticket_assignees.ticket_id', '=', 'tickets.id')
+                    ->where('ticket_assignees.is_active', 1)
+                    ->whereNull('ticket_assignees.deleted_at');
+            })
+            ->leftJoin('users as assignees', 'assignees.id', '=', 'ticket_assignees.user_id')
             ->select([
                 'tickets.id',
                 'tickets.project_id',
@@ -50,10 +82,22 @@ class Ticket extends Model
                 'tickets.priority',
                 'tickets.due_date',
                 'tickets.is_active',
+                DB::raw('GROUP_CONCAT(DISTINCT CONCAT(assignees.first_name, " ", assignees.last_name) ORDER BY assignees.first_name, assignees.last_name SEPARATOR ", ") as assignee_names'),
             ])
             ->whereNull('tickets.deleted_at')
             ->where('tickets.is_active', 1)
-            ->where('tickets.project_id', $projectId);
+            ->where('tickets.project_id', $projectId)
+            ->groupBy(
+                'tickets.id',
+                'tickets.project_id',
+                'tickets.title',
+                'tickets.description',
+                'tickets.status',
+                'tickets.label',
+                'tickets.priority',
+                'tickets.due_date',
+                'tickets.is_active'
+            );
 
         if (!empty($filters['search'])) {
             $query->where('tickets.title', 'like', '%' . $filters['search'] . '%');
@@ -113,6 +157,8 @@ class Ticket extends Model
                 'label'       => $row->label,
                 'priority'    => $row->priority,
                 'due_date'    => $row->due_date,
+                'is_active'   => (bool) $row->is_active,
+                'assignee_names' => $row->assignee_names ?? '',
                 'action'      => $actions ?: '—',
             ];
         }
@@ -132,6 +178,14 @@ class Ticket extends Model
             return null;
         }
 
+        $assigneeIds = DB::table('ticket_assignees')
+            ->where('ticket_id', $ticket->id)
+            ->where('is_active', 1)
+            ->whereNull('deleted_at')
+            ->pluck('user_id')
+            ->map('intval')
+            ->all();
+
         return [
             'id'          => $ticket->id,
             'project_id'  => $ticket->project_id,
@@ -142,6 +196,7 @@ class Ticket extends Model
             'priority'    => $ticket->priority,
             'due_date'    => $ticket->due_date,
             'is_active'   => (bool) $ticket->is_active,
+            'assignee_ids' => $assigneeIds,
         ];
     }
 
@@ -223,26 +278,9 @@ class Ticket extends Model
     // write
     public static function createTicket(array $data, int $projectId)
     {
-        return DB::table('tickets')->insertGetId([
-            'project_id'  => $projectId,
-            'title'       => $data['title'],
-            'description' => $data['description'] ?? null,
-            'status'      => $data['status'],
-            'label'       => $data['label'],
-            'priority'    => $data['priority'],
-            'due_date'    => $data['due_date'] ?? null,
-            'is_active'   => ! empty($data['is_active']) ? 1 : 0,
-            'created_at'  => now(),
-            'updated_at'  => now(),
-        ]);
-    }
-
-    public static function updateTicket($id, array $data)
-    {
-        return DB::table('tickets')
-            ->where('id', $id)
-            ->whereNull('deleted_at')
-            ->update([
+        return DB::transaction(function () use ($data, $projectId) {
+            $ticketId = DB::table('tickets')->insertGetId([
+                'project_id'  => $projectId,
                 'title'       => $data['title'],
                 'description' => $data['description'] ?? null,
                 'status'      => $data['status'],
@@ -250,8 +288,37 @@ class Ticket extends Model
                 'priority'    => $data['priority'],
                 'due_date'    => $data['due_date'] ?? null,
                 'is_active'   => ! empty($data['is_active']) ? 1 : 0,
+                'created_at'  => now(),
                 'updated_at'  => now(),
             ]);
+
+            TicketAssignee::syncForTicket($ticketId, $data['assignee_ids'] ?? []);
+
+            return $ticketId;
+        });
+    }
+
+    public static function updateTicket($id, array $data)
+    {
+        return DB::transaction(function () use ($id, $data) {
+            DB::table('tickets')
+                ->where('id', $id)
+                ->whereNull('deleted_at')
+                ->update([
+                    'title'       => $data['title'],
+                    'description' => $data['description'] ?? null,
+                    'status'      => $data['status'],
+                    'label'       => $data['label'],
+                    'priority'    => $data['priority'],
+                    'due_date'    => $data['due_date'] ?? null,
+                    'is_active'   => ! empty($data['is_active']) ? 1 : 0,
+                    'updated_at'  => now(),
+                ]);
+
+            if (array_key_exists('assignee_ids', $data)) {
+                TicketAssignee::syncForTicket((int) $id, $data['assignee_ids'] ?? []);
+            }
+        });
     }
 
     public static function updateStatus($id, string $status)

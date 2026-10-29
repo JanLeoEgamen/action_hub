@@ -32,6 +32,7 @@ class TicketController extends Controller implements HasMiddleware
 
         return view('tickets.index', [
             'project' => $project,
+            'users'   => Ticket::getUsersForAssignment(),
         ]);
     }
 
@@ -153,6 +154,8 @@ class TicketController extends Controller implements HasMiddleware
             'status'      => ['required', Rule::in(['open', 'in_progress', 'resolved', 'closed'])],
             'due_date'    => 'nullable|date',
             'is_active'   => 'nullable|boolean',
+            'assignee_ids'   => 'nullable|array',
+            'assignee_ids.*' => 'integer|exists:users,id',
         ]);
     }
 }

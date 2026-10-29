@@ -42,6 +42,20 @@ class PermissionSeeder extends Seeder
             }
         }
 
+        // Dashboard overview permissions (referenced by DashboardController middleware
+        // and dashboard.blade.php @can checks, but not part of the CRUD module set)
+        $dashboardPermissions = [
+            'view dashboard',
+            'view my overview',
+            'view project overview',
+            'view task overview',
+            'view organization overview',
+        ];
+
+        foreach ($dashboardPermissions as $permission) {
+            Permission::findOrCreate($permission, 'web');   // idempotent
+        }
+
         // Super Admin already bypasses via Gate::before; give it the full set explicitly
         if ($superAdmin = Role::where('name', 'Super Admin')->first()) {
             $superAdmin->syncPermissions(Permission::all());

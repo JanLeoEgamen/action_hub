@@ -67,6 +67,11 @@ class RoleController extends Controller implements HasMiddleware
                         : '';
                 })
                 ->addColumn('action', function ($role) {
+                    // Super Admin is protected: cannot be edited or deleted
+                    if ($role->name === 'Super Admin') {
+                        return '—';
+                    }
+
                     $buttons = '';
 
                     if (auth()->user()->can('edit roles')) {
@@ -122,6 +127,12 @@ class RoleController extends Controller implements HasMiddleware
             ], 404);
         }
 
+        if ($role->name === 'Super Admin') {
+            return response()->json([
+                'message' => 'Super Admin role cannot be edited.',
+            ], 403);
+        }
+
         return response()->json([
             'id' => $role->id,
             'name' => $role->name,
@@ -157,6 +168,13 @@ class RoleController extends Controller implements HasMiddleware
             return response()->json([
                 'message' => 'Role not found.',
             ], 404);
+        }
+
+        if ($role->name === 'Super Admin') {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Super Admin role cannot be edited.',
+            ], 403);
         }
 
         $validated = $this->validateRole($request, $id);
@@ -213,6 +231,13 @@ class RoleController extends Controller implements HasMiddleware
                 'status' => 'failed',
                 'message' => 'Role not found.',
             ], 404);
+        }
+
+        if ($role->name === 'Super Admin') {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Super Admin role cannot be deleted.',
+            ], 403);
         }
 
         $role->delete();
