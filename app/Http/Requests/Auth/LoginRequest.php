@@ -28,8 +28,24 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
+            'email'    => ['required', 'string', 'email', 'max:255'],
+            'password' => ['required', 'string', 'min:8'],
+        ];
+    }
+
+    /**
+     * Get custom validation messages.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'email.required'    => 'The email address is required.',
+            'email.email'       => 'Please enter a valid email address.',
+            'email.max'         => 'The email address may not be greater than 255 characters.',
+            'password.required' => 'The password is required.',
+            'password.min'      => 'The password must be at least 8 characters.',
         ];
     }
 
@@ -46,7 +62,7 @@ class LoginRequest extends FormRequest
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => 'Invalid email or password.',
             ]);
         }
 
