@@ -48,7 +48,24 @@ class Company extends Model
 
     public static function deleteCompany($id)
     {
-        return DB::table('companies')->where('id', $id)->update(['deleted_at' => now()]);
+        return DB::transaction(function () use ($id) {
+            // Soft delete the company
+            DB::table('companies')->where('id', $id)->update(['deleted_at' => now()]);
+
+            // Deactivate all departments of this company
+            DB::table('departments')
+                ->where('company_id', $id)
+                ->whereNull('deleted_at')
+                ->update(['is_active' => 0, 'updated_at' => now()]);
+
+            // Deactivate all groups under departments of this company
+            DB::table('groups')
+                ->whereIn('department_id', function ($q) use ($id) {
+                    $q->select('id')->from('departments')->where('company_id', $id);
+                })
+                ->whereNull('deleted_at')
+                ->update(['is_active' => 0, 'updated_at' => now()]);
+        });
     }
 
     public static function existsById($id)

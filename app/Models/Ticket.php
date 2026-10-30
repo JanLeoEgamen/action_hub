@@ -53,13 +53,21 @@ class Ticket extends Model
     // ---------------------------------------------------------------
 
     // list for users assignment
-    public static function getUsersForAssignment()
+    public static function getUsersForAssignment(?int $projectId = null)
     {
-        return DB::table('users')
-            ->select('id', 'first_name', 'last_name')
-            ->orderBy('first_name')
-            ->orderBy('last_name')
-            ->get();
+        $query = DB::table('users')
+            ->select('users.id', 'users.first_name', 'users.last_name')
+            ->orderBy('users.first_name')
+            ->orderBy('users.last_name');
+
+        if ($projectId !== null) {
+            $query->join('project_members', 'project_members.user_id', '=', 'users.id')
+                ->where('project_members.project_id', $projectId)
+                ->where('project_members.is_active', 1)
+                ->whereNull('project_members.deleted_at');
+        }
+
+        return $query->get();
     }
 
     // kanban board tickets

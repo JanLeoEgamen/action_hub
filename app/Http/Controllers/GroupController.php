@@ -51,7 +51,7 @@ class GroupController extends Controller implements HasMiddleware
     public function create()
     {
         return response()->json([
-            'departments' => Department::getAll(),
+            'departments' => Department::getForSelection(),
         ]);
     }
 

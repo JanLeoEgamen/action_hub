@@ -1,4 +1,4 @@
-﻿<x-app-layout>
+<x-app-layout>
     <x-slot name="header">
         <x-page-header
             title="Companies"
@@ -116,18 +116,32 @@
         confirm-label="Delete"
     />
 
+    <!-- Edit Confirmation Modal -->
+    <x-edit-confirmation-modal
+        id="editConfirmCompanyModal"
+        title="Confirm Edit"
+        message="Are you sure you want to edit this company?"
+        confirm-button-id="confirmEditCompany"
+        confirm-label="Edit"
+    />
+
     @push('scripts')
         <script>
             $(document).ready(function () {
                 const createModal = new bootstrap.Modal(document.getElementById('create-company-modal'));
                 const editModal = new bootstrap.Modal(document.getElementById('edit-company-modal'));
+                const editConfirmModal = new bootstrap.Modal(document.getElementById('editConfirmCompanyModal'));
                 const deleteModal = new bootstrap.Modal(document.getElementById('deleteCompanyModal'));
                 let deleteId = null;
+                let editConfirmId = null;
 
                 const table = $('.datatable').DataTable({
                     processing: true,
                     serverSide: false,
-                    ajax: '{{ route("companies.index") }}',
+                    ajax: {
+                        url: '{{ route("companies.index") }}',
+                        dataSrc: 'data'
+                    },
                     columns: [
                         { data: 'DT_RowIndex', orderable: false, searchable: false },
                         { data: 'company_name' },
@@ -174,6 +188,49 @@
                     });
                 });
 
+                // Confirm Edit before saving
+                $('#edit-company-form').on('submit', function (e) {
+                    e.preventDefault();
+                    editConfirmId = $('#edit-company_id').val();
+                    editConfirmModal.show();
+                });
+
+                $('#confirmEditCompany').on('click', function () {
+                    if (!editConfirmId) return;
+                    editConfirmModal.hide();
+
+                    const id = $('#edit-company_id').val();
+                    $('#edit-formErrors').addClass('d-none').empty();
+                    $('#saveEditCompany').prop('disabled', true).text('Saving...');
+
+                    $.ajax({
+                        url: `/companies/${id}`,
+                        method: 'PUT',
+                        data: $('#edit-company-form').serialize(),
+                        success: function (response) {
+                            editModal.hide();
+                            table.ajax.reload(null, false);
+                            $('#successMessage').text(response.message).removeClass('d-none');
+                            setTimeout(() => $('#successMessage').addClass('d-none'), 3000);
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                let messages = '';
+                                Object.values(xhr.responseJSON.errors).forEach(errs => {
+                                    errs.forEach(msg => messages += `<div>${msg}</div>`);
+                                });
+                                $('#edit-formErrors').html(messages).removeClass('d-none');
+                            } else {
+                                alert('Something went wrong.');
+                            }
+                        },
+                        complete: function () {
+                            $('#saveEditCompany').prop('disabled', false).text('Update');
+                            editConfirmId = null;
+                        }
+                    });
+                });
+
                 $('#create-company-form').on('submit', function (e) {
                     e.preventDefault();
                     $('#create-formErrors').addClass('d-none').empty();
@@ -202,39 +259,6 @@
                         },
                         complete: function () {
                             $('#saveCreateCompany').prop('disabled', false).text('Create');
-                        }
-                    });
-                });
-
-                $('#edit-company-form').on('submit', function (e) {
-                    e.preventDefault();
-                    const id = $('#edit-company_id').val();
-                    $('#edit-formErrors').addClass('d-none').empty();
-                    $('#saveEditCompany').prop('disabled', true).text('Saving...');
-
-                    $.ajax({
-                        url: `/companies/${id}`,
-                        method: 'PUT',
-                        data: $(this).serialize(),
-                        success: function (response) {
-                            editModal.hide();
-                            table.ajax.reload(null, false);
-                            $('#successMessage').text(response.message).removeClass('d-none');
-                            setTimeout(() => $('#successMessage').addClass('d-none'), 3000);
-                        },
-                        error: function (xhr) {
-                            if (xhr.status === 422) {
-                                let messages = '';
-                                Object.values(xhr.responseJSON.errors).forEach(errs => {
-                                    errs.forEach(msg => messages += `<div>${msg}</div>`);
-                                });
-                                $('#edit-formErrors').html(messages).removeClass('d-none');
-                            } else {
-                                alert('Something went wrong.');
-                            }
-                        },
-                        complete: function () {
-                            $('#saveEditCompany').prop('disabled', false).text('Update');
                         }
                     });
                 });

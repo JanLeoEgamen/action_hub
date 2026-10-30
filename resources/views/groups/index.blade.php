@@ -113,13 +113,24 @@
     </div>
     <x-delete-confirmation-modal id="deleteGroupModal" title="Confirm Delete" message="Are you sure you want to delete this group?" confirm-button-id="confirmDeleteGroup" confirm-label="Delete" />
 
+    <!-- Edit Confirmation Modal -->
+    <x-edit-confirmation-modal
+        id="editConfirmGroupModal"
+        title="Confirm Edit"
+        message="Are you sure you want to edit this group?"
+        confirm-button-id="confirmEditGroup"
+        confirm-label="Edit"
+    />
+
     @push('scripts')
         <script>
             $(document).ready(function () {
                 const createModal = new bootstrap.Modal(document.getElementById('create-group-modal'));
                 const editModal = new bootstrap.Modal(document.getElementById('edit-group-modal'));
+                const editConfirmModal = new bootstrap.Modal(document.getElementById('editConfirmGroupModal'));
                 const deleteModal = new bootstrap.Modal(document.getElementById('deleteGroupModal'));
                 let deleteId = null;
+                let editConfirmId = null;
 
                 const table = $('.datatable').DataTable({
                     processing: true,
@@ -171,6 +182,47 @@
                     });
                 });
 
+                // Confirm Edit before saving
+                $('#edit-group-form').on('submit', function (e) {
+                    e.preventDefault();
+                    editConfirmId = $('#edit-group_id').val();
+                    editConfirmModal.show();
+                });
+
+                $('#confirmEditGroup').on('click', function () {
+                    if (!editConfirmId) return;
+                    editConfirmModal.hide();
+
+                    const id = $('#edit-group_id').val();
+                    $('#edit-formErrors').addClass('d-none').empty();
+                    $('#saveEditGroup').prop('disabled', true).text('Saving...');
+
+                    $.ajax({
+                        url: `/groups/${id}`,
+                        method: 'PUT',
+                        data: $('#edit-group-form').serialize(),
+                        success: function (response) {
+                            editModal.hide();
+                            table.ajax.reload(null, false);
+                            $('#successMessage').text(response.message).removeClass('d-none');
+                            setTimeout(() => $('#successMessage').addClass('d-none'), 3000);
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                let messages = '';
+                                Object.values(xhr.responseJSON.errors).forEach(errs => errs.forEach(msg => messages += `<div>${msg}</div>`));
+                                $('#edit-formErrors').html(messages).removeClass('d-none');
+                            } else {
+                                alert('Something went wrong.');
+                            }
+                        },
+                        complete: function () {
+                            $('#saveEditGroup').prop('disabled', false).text('Update');
+                            editConfirmId = null;
+                        }
+                    });
+                });
+
                 $('#create-group-form').on('submit', function (e) {
                     e.preventDefault();
                     $('#create-formErrors').addClass('d-none').empty();
@@ -195,35 +247,6 @@
                         },
                         complete: function () {
                             $('#saveCreateGroup').prop('disabled', false).text('Create');
-                        }
-                    });
-                });
-
-                $('#edit-group-form').on('submit', function (e) {
-                    e.preventDefault();
-                    const id = $('#edit-group_id').val();
-                    $('#edit-formErrors').addClass('d-none').empty();
-                    $('#saveEditGroup').prop('disabled', true).text('Saving...');
-
-                    $.ajax({
-                        url: `/groups/${id}`,
-                        method: 'PUT',
-                        data: $(this).serialize(),
-                        success: function (response) {
-                            editModal.hide();
-                            table.ajax.reload(null, false);
-                            $('#successMessage').text(response.message).removeClass('d-none');
-                            setTimeout(() => $('#successMessage').addClass('d-none'), 3000);
-                        },
-                        error: function (xhr) {
-                            if (xhr.status === 422) {
-                                let messages = '';
-                                Object.values(xhr.responseJSON.errors).forEach(errs => errs.forEach(msg => messages += `<div>${msg}</div>`));
-                                $('#edit-formErrors').html(messages).removeClass('d-none');
-                            }
-                        },
-                        complete: function () {
-                            $('#saveEditGroup').prop('disabled', false).text('Update');
                         }
                     });
                 });

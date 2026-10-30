@@ -66,6 +66,12 @@ class TaskController extends Controller implements HasMiddleware
             ], 404);
         }
 
+        if (! Task::isAccessibleBy($task, auth()->id())) {
+            return response()->json([
+                'message' => 'You do not have access to this task.',
+            ], 403);
+        }
+
         return response()->json($task);
     }
 
@@ -91,6 +97,14 @@ class TaskController extends Controller implements HasMiddleware
             ], 404);
         }
 
+        $task = Task::findById($id);
+
+        if (! Task::isAccessibleBy($task, auth()->id())) {
+            return response()->json([
+                'message' => 'You do not have access to this task.',
+            ], 403);
+        }
+
         $validated = $this->validateTask($request);
 
         Task::updateTask($id, $validated);
@@ -114,6 +128,14 @@ class TaskController extends Controller implements HasMiddleware
             ], 404);
         }
 
+        $task = Task::findById($id);
+
+        if (! Task::isAccessibleBy($task, auth()->id())) {
+            return response()->json([
+                'message' => 'You do not have access to this task.',
+            ], 403);
+        }
+
         Task::updateStatus($id, $validated['status']);
 
         return response()->json([
@@ -130,6 +152,15 @@ class TaskController extends Controller implements HasMiddleware
                 'status'  => 'failed',
                 'message' => 'Task not found.',
             ], 404);
+        }
+
+        $task = Task::findById($id);
+
+        if (! Task::isAccessibleBy($task, auth()->id())) {
+            return response()->json([
+                'status'  => 'failed',
+                'message' => 'You do not have access to this task.',
+            ], 403);
         }
 
         Task::deleteTask($id);

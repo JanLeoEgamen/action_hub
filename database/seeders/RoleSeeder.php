@@ -47,6 +47,12 @@ class RoleSeeder extends Seeder
                 'view tasks',
                 'view tickets',
             ],
+            'User' => [
+                'view projects', 'create projects', 'edit projects', 'delete projects',
+                'view tasks', 'create tasks', 'edit tasks', 'delete tasks',
+                'view tickets', 'create tickets', 'edit tickets', 'delete tickets',
+                'view dashboard', 'view my overview',
+            ],
         ];
 
         foreach ($rolePermissions as $roleName => $permissions) {

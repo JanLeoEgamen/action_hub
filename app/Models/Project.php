@@ -46,9 +46,6 @@ class Project extends Model
         return $this->hasMany(Ticket::class);
     }
 
-    // ---------------------------------------------------------------
-    // Dropdown / lookup sources
-    // ---------------------------------------------------------------
 
     public static function getUsersForSelection()
     {
@@ -59,9 +56,6 @@ class Project extends Model
             ->get();
     }
 
-    // ---------------------------------------------------------------
-    // Project list
-    // ---------------------------------------------------------------
 
     public static function getProjectList(array $filters, int $currentUserId): array
     {
@@ -167,10 +161,6 @@ class Project extends Model
         return $projects;
     }
 
-    // ---------------------------------------------------------------
-    // Single-project reads
-    // ---------------------------------------------------------------
-
     public static function getProjectForEdit($id)
     {
         $project = DB::table('projects')
@@ -217,10 +207,6 @@ class Project extends Model
             ->whereNull('deleted_at')
             ->exists();
     }
-
-    // ---------------------------------------------------------------
-    // Dashboard
-    // ---------------------------------------------------------------
 
     public static function getStatusCounts()
     {
@@ -274,10 +260,7 @@ class Project extends Model
         ];
     }
 
-    // ---------------------------------------------------------------
-    // Dashboard - Personal (my overview)
-    // ---------------------------------------------------------------
-
+    // my overview
     protected static function personalBase(int $userId)
     {
         return DB::table('projects')
@@ -320,10 +303,6 @@ class Project extends Model
             'completed' => self::personalBase($userId)->where('status', 'completed')->count(),
         ];
     }
-
-    // ---------------------------------------------------------------
-    // Writes
-    // ---------------------------------------------------------------
 
     public static function createProject(array $data, int $ownerId)
     {

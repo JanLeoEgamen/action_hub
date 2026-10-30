@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\ProjectMember;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -32,7 +33,7 @@ class TicketController extends Controller implements HasMiddleware
 
         return view('tickets.index', [
             'project' => $project,
-            'users'   => Ticket::getUsersForAssignment(),
+            'users'   => Ticket::getUsersForAssignment((int) $projectId),
         ]);
     }
 
@@ -85,6 +86,8 @@ class TicketController extends Controller implements HasMiddleware
 
         $validated = $this->validateTicket($request);
 
+        $this->ensureAssigneesAreProjectMembers((int) $projectId, $validated['assignee_ids'] ?? []);
+
         Ticket::createTicket($validated, (int) $projectId);
 
         return response()->json([
@@ -99,7 +102,12 @@ class TicketController extends Controller implements HasMiddleware
             return response()->json(['message' => 'Ticket not found.'], 404);
         }
 
+        $ticket = Ticket::findById($id);
+        $projectId = $ticket->project_id;
+
         $validated = $this->validateTicket($request);
+
+        $this->ensureAssigneesAreProjectMembers((int) $projectId, $validated['assignee_ids'] ?? []);
 
         Ticket::updateTicket($id, $validated);
 
@@ -157,5 +165,32 @@ class TicketController extends Controller implements HasMiddleware
             'assignee_ids'   => 'nullable|array',
             'assignee_ids.*' => 'integer|exists:users,id',
         ]);
+    }
+
+    /**
+     * Ensure all given assignee IDs are active members of the project.
+     * Throws a ValidationException (422) if any assignee is not a project member.
+     */
+    private function ensureAssigneesAreProjectMembers(int $projectId, array $assigneeIds): void
+    {
+        if (empty($assigneeIds)) {
+            return;
+        }
+
+        $memberUserIds = ProjectMember::where('project_id', $projectId)
+            ->where('is_active', 1)
+            ->whereNull('deleted_at')
+            ->pluck('user_id')
+            ->all();
+
+        $invalid = array_diff($assigneeIds, $memberUserIds);
+        if (! empty($invalid)) {
+            throw new \Illuminate\Validation\ValidationException(
+                validator()->make(
+                    ['assignee_ids' => $assigneeIds],
+                    ['assignee_ids.*' => 'Selected assignees must be active members of this project.']
+                )
+            );
+        }
     }
 }

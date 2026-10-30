@@ -306,12 +306,22 @@
         confirm-label="Delete"
     />
 
+    <!-- Edit Confirmation Modal -->
+    <x-edit-confirmation-modal
+        id="editConfirmTaskModal"
+        title="Confirm Edit"
+        message="Are you sure you want to edit this task?"
+        confirm-button-id="confirmEditTask"
+        confirm-label="Edit"
+    />
+
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
         <script>
             $(document).ready(function () {
                 const createModal = new bootstrap.Modal(document.getElementById('create-task-modal'));
                 const editModal = new bootstrap.Modal(document.getElementById('edit-task-modal'));
+                const editConfirmModal = new bootstrap.Modal(document.getElementById('editConfirmTaskModal'));
 
                 const STATUS_LABELS = {
                     pending: 'Pending',
@@ -399,6 +409,7 @@
                                         <h6 class="card-title">${escapeHtml(task.title)}</h6>
                                         <p class="card-text text-muted small">${escapeHtml(task.description || '')}</p>
                                         ${task.due_date ? `<small class="text-muted">Due: ${escapeHtml(task.due_date)}</small><br>` : ''}
+                                        ${task.creator ? `<small class="text-muted">Created by: ${escapeHtml(task.creator)}</small><br>` : ''}
                                         <button type="button" class="btn btn-sm btn-success edit-task" data-id="${task.id}">Edit</button>
                                         <button type="button" class="btn btn-sm btn-danger delete-task" data-id="${task.id}">Delete</button>
                                     </div>
@@ -428,6 +439,7 @@
                     createModal.show();
                 });
 
+                // Open Edit Confirmation modal for Edit
                 $('#kanban-board').on('click', '.edit-task', function (e) {
                     e.preventDefault();
 
@@ -470,6 +482,44 @@
                     });
                 });
 
+                // Confirm Edit before saving
+                $('#edit-task-form').on('submit', function (e) {
+                    e.preventDefault();
+                    editConfirmTaskId = $('#edit-task_id').val();
+                    editConfirmModal.show();
+                });
+
+                $('#confirmEditTask').on('click', function () {
+                    if (!editConfirmTaskId) return;
+                    editConfirmModal.hide();
+
+                    const button = $(this).prop('disabled', true).text('Loading...');
+                    const originalText = button.text();
+                    button.data('loading', true);
+                    button.prop('disabled', true);
+
+                    const id = $('#edit-task_id').val();
+
+                    $.ajax({
+                        url: `/tasks/${id}`,
+                        method: 'PUT',
+                        data: $('#edit-task-form').serialize(),
+                        success: function (response) {
+                            editModal.hide();
+                            showSuccess(response.message);
+                            loadBoard();
+                        },
+                        error: function (xhr) {
+                            alert(xhr.responseJSON?.message || 'Unable to save task.');
+                        },
+                        complete: function () {
+                            button.prop('disabled', false).text(originalText);
+                            button.removeData('loading');
+                            editConfirmTaskId = null;
+                        }
+                    });
+                });
+
                 $('#create-task-form').on('submit', function (e) {
                     e.preventDefault();
 
@@ -507,43 +557,15 @@
                 $('#edit-task-form').on('submit', function (e) {
                     e.preventDefault();
 
-                    const id = $('#edit-task_id').val();
-
-                    $('#edit-formErrors').addClass('d-none').empty();
-                    $('#saveEditTask').prop('disabled', true).text('Saving...');
-
-                    $.ajax({
-                        url: `/tasks/${id}`,
-                        method: 'PUT',
-                        data: $(this).serialize(),
-                        success: function (response) {
-                            editModal.hide();
-                            showSuccess(response.message);
-                            loadBoard();
-                        },
-                        error: function (xhr) {
-                            if (xhr.status === 422) {
-                                let messages = '';
-                                Object.values(xhr.responseJSON.errors).forEach(function (fieldErrors) {
-                                    fieldErrors.forEach(function (message) {
-                                        messages += `<div>${message}</div>`;
-                                    });
-                                });
-                                $('#edit-formErrors').html(messages).removeClass('d-none');
-                            } else {
-                                alert(xhr.responseJSON?.message || 'Unable to save task.');
-                            }
-                        },
-                        complete: function () {
-                            $('#saveEditTask').prop('disabled', false).text('Save');
-                        }
-                    });
+                    editConfirmTaskId = $('#edit-task_id').val();
+                    editConfirmModal.show();
                 });
 
                 // Delete
                 const deleteModalElement = document.getElementById('deleteTaskModal');
                 const deleteModal = new bootstrap.Modal(deleteModalElement);
                 let deleteTaskId = null;
+                let editConfirmTaskId = null;
 
                 $('#kanban-board').on('click', '.delete-task', function (e) {
                     e.preventDefault();

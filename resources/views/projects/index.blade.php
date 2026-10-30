@@ -234,11 +234,21 @@
         confirm-label="Delete"
     />
 
+    <!-- Edit Confirmation Modal -->
+    <x-edit-confirmation-modal
+        id="editConfirmProjectModal"
+        title="Confirm Edit"
+        message="Are you sure you want to edit this project?"
+        confirm-button-id="confirmEditProject"
+        confirm-label="Edit"
+    />
+
     @push('scripts')
         <script>
             $(document).ready(function () {
                 const createModal = new bootstrap.Modal(document.getElementById('create-project-modal'));
                 const editModal = new bootstrap.Modal(document.getElementById('edit-project-modal'));
+                const editConfirmModal = new bootstrap.Modal(document.getElementById('editConfirmProjectModal'));
 
                 const STATUS_LABELS = {
                     planning: 'Planning',
@@ -348,6 +358,7 @@
                     createModal.show();
                 });
 
+                // Open Edit Confirmation modal for Edit.
                 $('#projectCardGrid').on('click', '.edit-project', function (e) {
                     e.preventDefault();
 
@@ -385,6 +396,54 @@
                             button.prop('disabled', false);
                             button.text(originalText);
                             button.removeData('loading');
+                        }
+                    });
+                });
+
+                // Confirm Edit before saving
+                $('#edit-project-form').on('submit', function (e) {
+                    e.preventDefault();
+                    editConfirmProjectId = $('#edit-project_id').val();
+                    editConfirmModal.show();
+                });
+
+                $('#confirmEditProject').on('click', function () {
+                    if (!editConfirmProjectId) return;
+                    editConfirmModal.hide();
+
+                    const button = $(this).prop('disabled', true).text('Loading...');
+                    const originalText = button.text();
+                    button.data('loading', true);
+                    button.prop('disabled', true);
+
+                    const id = $('#edit-project_id').val();
+
+                    $.ajax({
+                        url: `/projects/${id}`,
+                        method: 'PUT',
+                        data: $('#edit-project-form').serialize(),
+                        success: function (response) {
+                            editModal.hide();
+                            showSuccess(response.message);
+                            loadList();
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                let messages = '';
+                                Object.values(xhr.responseJSON.errors).forEach(function (fieldErrors) {
+                                    fieldErrors.forEach(function (message) {
+                                        messages += `<div>${message}</div>`;
+                                    });
+                                });
+                                $('#edit-formErrors').html(messages).removeClass('d-none');
+                            } else {
+                                alert(xhr.responseJSON?.message || 'Unable to save project.');
+                            }
+                        },
+                        complete: function () {
+                            button.prop('disabled', false).text(originalText);
+                            button.removeData('loading');
+                            editConfirmProjectId = null;
                         }
                     });
                 });
@@ -427,42 +486,6 @@
                     });
                 });
 
-                $('#edit-project-form').on('submit', function (e) {
-                    e.preventDefault();
-
-                    const id = $('#edit-project_id').val();
-
-                    $('#edit-formErrors').addClass('d-none').empty();
-                    $('#saveEditProject').prop('disabled', true).text('Saving...');
-
-                    $.ajax({
-                        url: `/projects/${id}`,
-                        method: 'PUT',
-                        data: $(this).serialize(),
-                        success: function (response) {
-                            editModal.hide();
-                            showSuccess(response.message);
-                            loadList();
-                        },
-                        error: function (xhr) {
-                            if (xhr.status === 422) {
-                                let messages = '';
-                                Object.values(xhr.responseJSON.errors).forEach(function (fieldErrors) {
-                                    fieldErrors.forEach(function (message) {
-                                        messages += `<div>${message}</div>`;
-                                    });
-                                });
-                                $('#edit-formErrors').html(messages).removeClass('d-none');
-                            } else {
-                                alert(xhr.responseJSON?.message || 'Unable to save project.');
-                            }
-                        },
-                        complete: function () {
-                            $('#saveEditProject').prop('disabled', false).text('Save');
-                        }
-                    });
-                });
-
                 // Filters
                 $('#filter, #status, #is_active').on('change', loadList);
                 let searchDebounce;
@@ -475,6 +498,7 @@
                 const deleteModalElement = document.getElementById('deleteProjectModal');
                 const deleteModal = new bootstrap.Modal(deleteModalElement);
                 let deleteProjectId = null;
+                let editConfirmProjectId = null;
 
                 $('#projectCardGrid').on('click', '.delete-project', function (e) {
                     e.preventDefault();

@@ -18,6 +18,7 @@ class UserSeeder extends Seeder
         $adminRole = Role::where('name', 'Admin')->where('guard_name', 'web')->first();
         $managerRole = Role::where('name', 'Manager')->where('guard_name', 'web')->first();
         $staffRole = Role::where('name', 'Staff')->where('guard_name', 'web')->first();
+        $userRole = Role::where('name', 'User')->where('guard_name', 'web')->first();
 
         $users = [
             [
@@ -47,6 +48,27 @@ class UserSeeder extends Seeder
                 'email' => 'staff@example.com',
                 'password' => 'password',
                 'role' => $staffRole,
+            ],
+            [
+                'first_name' => 'Jan Leo',
+                'last_name' => 'Egamen',
+                'email' => 'user1@example.com',
+                'password' => 'user1@example.com',
+                'role' => $userRole,
+            ],
+            [
+                'first_name' => 'Jerald',
+                'last_name' => 'Arzanan',
+                'email' => 'user2@example.com',
+                'password' => 'user2@example.com',
+                'role' => $userRole,
+            ],
+            [
+                'first_name' => 'Louisa',
+                'last_name' => 'Santos',
+                'email' => 'user3@example.com',
+                'password' => 'user3@example.com',
+                'role' => $userRole,
             ],
         ];
 

@@ -23,6 +23,19 @@ class Group extends Model
             ->get();
     }
 
+    public static function getForSelection()
+    {
+        return DB::table('groups')
+            ->join('departments', 'groups.department_id', '=', 'departments.id')
+            ->join('companies', 'departments.company_id', '=', 'companies.id')
+            ->whereNull('groups.deleted_at')
+            ->whereNull('departments.deleted_at')
+            ->whereNull('companies.deleted_at')
+            ->select('groups.*', 'departments.department_name', 'companies.company_name')
+            ->orderByDesc('groups.created_at')
+            ->get();
+    }
+
     public static function findById($id)
     {
         return DB::table('groups')->where('id', $id)->whereNull('deleted_at')->first();

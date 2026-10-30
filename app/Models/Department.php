@@ -22,6 +22,18 @@ class Department extends Model
             ->get();
     }
 
+    // Departments available for selection dropdowns (excludes deleted companies)
+    public static function getForSelection()
+    {
+        return DB::table('departments')
+            ->join('companies', 'departments.company_id', '=', 'companies.id')
+            ->whereNull('departments.deleted_at')
+            ->whereNull('companies.deleted_at')
+            ->select('departments.*', 'companies.company_name')
+            ->orderByDesc('departments.created_at')
+            ->get();
+    }
+
     public static function findById($id)
     {
         return DB::table('departments')->where('id', $id)->whereNull('deleted_at')->first();

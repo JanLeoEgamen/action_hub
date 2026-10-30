@@ -278,6 +278,15 @@
         confirm-label="Delete"
     />
 
+    <!-- Edit Confirmation Modal -->
+    <x-edit-confirmation-modal
+        id="editConfirmRoleModal"
+        title="Confirm Edit"
+        message="Are you sure you want to edit this role?"
+        confirm-button-id="confirmEditRole"
+        confirm-label="Edit"
+    />
+
     @push('scripts')
         <script>
             $(document).ready(function () {
@@ -290,6 +299,10 @@
                     document.getElementById('edit-role-modal');
                 const editModal =
                     new bootstrap.Modal(editModalElement);
+
+                const editConfirmModalElement =
+                    document.getElementById('editConfirmRoleModal');
+                const editConfirmModal = new bootstrap.Modal(editConfirmModalElement);
 
                 const table = $('.datatable').DataTable({
                     processing: true,
@@ -403,7 +416,7 @@
                     createModal.show();
                 });
 
-                // Open modal and load role data for Edit
+                // Open Edit Confirmation modal for Edit
                 $('.datatable').on('click', '.edit-role', function (e) {
                     e.preventDefault();
 
@@ -457,6 +470,44 @@
                     });
                 });
 
+                // Confirm Edit before saving
+                $('#edit-role-form').on('submit', function (e) {
+                    e.preventDefault();
+                    editConfirmRoleId = $('#edit-role_id').val();
+                    editConfirmModal.show();
+                });
+
+                $('#confirmEditRole').on('click', function () {
+                    if (!editConfirmRoleId) return;
+                    editConfirmModal.hide();
+
+                    const id = $('#edit-role_id').val();
+
+                    $('#edit-formErrors').addClass('d-none').empty();
+                    $('#saveEditRole').prop('disabled', true).text('Saving...');
+
+                    $.ajax({
+                        url: `/roles/${id}`,
+                        method: 'PUT',
+                        data: $('#edit-role-form').serialize(),
+
+                        success: function (response) {
+                            editModal.hide();
+                            table.ajax.reload(null, false);
+                            showSuccess(response.message);
+                        },
+
+                        error: function (xhr) {
+                            showEditErrors(xhr);
+                        },
+
+                        complete: function () {
+                            $('#saveEditRole').prop('disabled', false).text('Update');
+                            editConfirmRoleId = null;
+                        }
+                    });
+                });
+
                 // Create form submit
                 $('#create-role-form').on('submit', function (e) {
                     e.preventDefault();
@@ -485,35 +536,6 @@
                     });
                 });
 
-                // Edit form submit
-                $('#edit-role-form').on('submit', function (e) {
-                    e.preventDefault();
-
-                    const id = $('#edit-role_id').val();
-
-                    $('#edit-formErrors').addClass('d-none').empty();
-                    $('#saveEditRole').prop('disabled', true).text('Saving...');
-
-                    $.ajax({
-                        url: `/roles/${id}`,
-                        method: 'PUT',
-                        data: $(this).serialize(),
-
-                        success: function (response) {
-                            editModal.hide();
-                            table.ajax.reload(null, false);
-                            showSuccess(response.message);
-                        },
-
-                        error: function (xhr) {
-                            showEditErrors(xhr);
-                        },
-
-                        complete: function () {
-                            $('#saveEditRole').prop('disabled', false).text('Update');
-                        }
-                    });
-                });
                 // Delete confirmation modal
                 const deleteModalElement =
                     document.getElementById('deleteRoleModal');
@@ -522,6 +544,7 @@
                     new bootstrap.Modal(deleteModalElement);
 
                 let deleteRoleId = null;
+                let editConfirmRoleId = null;
 
                 // Open confirmation modal
                 $('.datatable').on('click', '.delete-role', function (e) {

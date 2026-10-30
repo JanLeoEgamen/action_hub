@@ -344,6 +344,15 @@
         confirm-label="Delete"
     />
 
+    <!-- Edit Confirmation Modal -->
+    <x-edit-confirmation-modal
+        id="editConfirmUserModal"
+        title="Confirm Edit"
+        message="Are you sure you want to edit this user?"
+        confirm-button-id="confirmEditUser"
+        confirm-label="Edit"
+    />
+
     @push('scripts')
         <script>
             $(document).ready(function () {
@@ -352,6 +361,9 @@
 
                 const editModalElement = document.getElementById('edit-user-modal');
                 const editModal = new bootstrap.Modal(editModalElement);
+
+                const editConfirmModalElement = document.getElementById('editConfirmUserModal');
+                const editConfirmModal = new bootstrap.Modal(editConfirmModalElement);
 
                 const table = $('.datatable').DataTable({
                     processing: true,
@@ -492,8 +504,16 @@
                 });
 
                 // Edit form submit.
+                // Confirm Edit before saving
                 $('#edit-user-form').on('submit', function (e) {
                     e.preventDefault();
+                    editConfirmUserId = $('#edit-user_id').val();
+                    editConfirmModal.show();
+                });
+
+                $('#confirmEditUser').on('click', function () {
+                    if (!editConfirmUserId) return;
+                    editConfirmModal.hide();
 
                     const id = $('#edit-user_id').val();
 
@@ -503,7 +523,7 @@
                     $.ajax({
                         url: `/users/${id}`,
                         method: 'PUT',
-                        data: $(this).serialize(),
+                        data: $('#edit-user-form').serialize(),
 
                         success: function (response) {
                             editModal.hide();
@@ -533,6 +553,8 @@
                             $('#saveEditUser').prop('disabled', false).text('Update');
                         }
                     });
+
+                    editConfirmUserId = null;
                 });
                 // Delete using Bootstrap confirmation modal.
                 const deleteModalElement =
@@ -542,6 +564,7 @@
                     new bootstrap.Modal(deleteModalElement);
 
                 let deleteUserId = null;
+                let editConfirmUserId = null;
 
                 $('.datatable').on('click', '.delete-user', function (e) {
                     e.preventDefault();

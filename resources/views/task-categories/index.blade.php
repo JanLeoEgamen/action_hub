@@ -145,6 +145,15 @@
         confirm-label="Delete"
     />
 
+    <!-- Edit Confirmation Modal -->
+    <x-edit-confirmation-modal
+        id="editConfirmCategoryModal"
+        title="Confirm Edit"
+        message="Are you sure you want to edit this task category?"
+        confirm-button-id="confirmEditCategory"
+        confirm-label="Edit"
+    />
+
     @push('scripts')
         <script>
             $(document).ready(function () {
@@ -154,11 +163,15 @@
                 const editModalElement = document.getElementById('edit-taskCategory-modal');
                 const editModal = new bootstrap.Modal(editModalElement);
 
+                const editConfirmModalElement = document.getElementById('editConfirmCategoryModal');
+                const editConfirmModal = new bootstrap.Modal(editConfirmModalElement);
+
                 const deleteModalElement = document.getElementById('deleteCategoryModal');
                 const deleteModal = new bootstrap.Modal(deleteModalElement);
 
                 let deleteCategoryId = null;
                 let deleteButton = null;
+                let editConfirmCategoryId = null;
 
                 const table = $('.datatable').DataTable({
                     processing: true,
@@ -206,7 +219,7 @@
                     createModal.show();
                 });
 
-                // Open modal and load data for Edit
+                // Open Edit Confirmation modal for Edit
                 $('.datatable').on('click', '.edit-taskCategory', function (e) {
                     e.preventDefault();
 
@@ -231,6 +244,57 @@
                             editModal.show();
                         },
                         error: function () { alert('Unable to load data.'); }
+                    });
+                });
+
+                // Confirm Edit before saving
+                $('#edit-taskCategory-form').on('submit', function (e) {
+                    e.preventDefault();
+                    editConfirmCategoryId = $('#edit-category_id').val();
+                    editConfirmModal.show();
+                });
+
+                $('#confirmEditCategory').on('click', function () {
+                    if (!editConfirmCategoryId) return;
+                    editConfirmModal.hide();
+
+                    const id = $('#edit-category_id').val();
+                    $('#edit-formErrors').addClass('d-none').empty();
+                    $('#saveEditCategory').prop('disabled', true).text('Saving...');
+
+                    $.ajax({
+                        url: `/task-categories/${id}`,
+                        method: 'PUT',
+                        data: $('#edit-taskCategory-form').serialize(),
+                        success: function (response) {
+                            editModal.hide();
+                            table.ajax.reload(null, false);
+                            $('#successMessage')
+                                .text(response.message)
+                                .removeClass('d-none');
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                let messages = '';
+                                const errors = xhr.responseJSON.errors;
+                                Object.values(errors).forEach(function (fieldErrors) {
+                                    fieldErrors.forEach(function (message) {
+                                        messages += `<div>${message}</div>`;
+                                    });
+                                });
+                                $('#edit-formErrors')
+                                    .html(messages)
+                                    .removeClass('d-none');
+                            } else {
+                                alert(xhr.responseJSON?.message || 'Unable to save category.');
+                            }
+                        },
+                        complete: function () {
+                            $('#saveEditCategory')
+                                .prop('disabled', false)
+                                .text('Save');
+                            editConfirmCategoryId = null;
+                        }
                     });
                 });
 
@@ -270,50 +334,6 @@
                         },
                         complete: function () {
                             $('#saveCreateCategory')
-                                .prop('disabled', false)
-                                .text('Save');
-                        }
-                    });
-                });
-
-                // Edit form submit
-                $('#edit-taskCategory-form').on('submit', function (e) {
-                    e.preventDefault();
-
-                    const id = $('#edit-category_id').val();
-
-                    $('#edit-formErrors').addClass('d-none').empty();
-                    $('#saveEditCategory').prop('disabled', true).text('Saving...');
-
-                    $.ajax({
-                        url: `/task-categories/${id}`,
-                        method: 'PUT',
-                        data: $(this).serialize(),
-                        success: function (response) {
-                            editModal.hide();
-                            table.ajax.reload(null, false);
-                            $('#successMessage')
-                                .text(response.message)
-                                .removeClass('d-none');
-                        },
-                        error: function (xhr) {
-                            if (xhr.status === 422) {
-                                let messages = '';
-                                const errors = xhr.responseJSON.errors;
-                                Object.values(errors).forEach(function (fieldErrors) {
-                                    fieldErrors.forEach(function (message) {
-                                        messages += `<div>${message}</div>`;
-                                    });
-                                });
-                                $('#edit-formErrors')
-                                    .html(messages)
-                                    .removeClass('d-none');
-                            } else {
-                                alert(xhr.responseJSON?.message || 'Unable to save category.');
-                            }
-                        },
-                        complete: function () {
-                            $('#saveEditCategory')
                                 .prop('disabled', false)
                                 .text('Save');
                         }

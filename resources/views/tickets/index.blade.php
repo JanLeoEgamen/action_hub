@@ -304,6 +304,15 @@
         confirm-label="Delete"
     />
 
+    <!-- Edit Confirmation Modal -->
+    <x-edit-confirmation-modal
+        id="editConfirmTicketModal"
+        title="Confirm Edit"
+        message="Are you sure you want to edit this ticket?"
+        confirm-button-id="confirmEditTicket"
+        confirm-label="Edit"
+    />
+
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
         <script>
@@ -312,6 +321,7 @@
 
                 const createModal = new bootstrap.Modal(document.getElementById('create-ticket-modal'));
                 const editModal = new bootstrap.Modal(document.getElementById('edit-ticket-modal'));
+                const editConfirmModal = new bootstrap.Modal(document.getElementById('editConfirmTicketModal'));
 
                 const STATUS_LABELS = {
                     open: 'Open',
@@ -417,6 +427,7 @@
                     createModal.show();
                 });
 
+                // Open Edit Confirmation modal for Edit
                 $('#kanban-board').on('click', '.edit-ticket', function (e) {
                     e.preventDefault();
                     const button = $(this);
@@ -457,6 +468,44 @@
                     });
                 });
 
+                // Confirm Edit before saving
+                $('#edit-ticket-form').on('submit', function (e) {
+                    e.preventDefault();
+                    editConfirmTicketId = $('#edit-ticket_id').val();
+                    editConfirmModal.show();
+                });
+
+                $('#confirmEditTicket').on('click', function () {
+                    if (!editConfirmTicketId) return;
+                    editConfirmModal.hide();
+
+                    const button = $(this).prop('disabled', true).text('Loading...');
+                    const originalText = button.text();
+                    button.data('loading', true);
+                    button.prop('disabled', true);
+
+                    const id = $('#edit-ticket_id').val();
+
+                    $.ajax({
+                        url: `/tickets/${id}`,
+                        method: 'PUT',
+                        data: $('#edit-ticket-form').serialize(),
+                        success: function (response) {
+                            editModal.hide();
+                            showSuccess(response.message);
+                            loadBoard();
+                        },
+                        error: function (xhr) {
+                            alert(xhr.responseJSON?.message || 'Unable to save ticket.');
+                        },
+                        complete: function () {
+                            button.prop('disabled', false).text(originalText);
+                            button.removeData('loading');
+                            editConfirmTicketId = null;
+                        }
+                    });
+                });
+
                 $('#create-ticket-form').on('submit', function (e) {
                     e.preventDefault();
 
@@ -491,42 +540,6 @@
                     });
                 });
 
-                $('#edit-ticket-form').on('submit', function (e) {
-                    e.preventDefault();
-
-                    const id = $('#edit-ticket_id').val();
-
-                    $('#edit-formErrors').addClass('d-none').empty();
-                    $('#saveEditTicket').prop('disabled', true).text('Saving...');
-
-                    $.ajax({
-                        url: `/tickets/${id}`,
-                        method: 'PUT',
-                        data: $(this).serialize(),
-                        success: function (response) {
-                            editModal.hide();
-                            showSuccess(response.message);
-                            loadBoard();
-                        },
-                        error: function (xhr) {
-                            if (xhr.status === 422) {
-                                let messages = '';
-                                Object.values(xhr.responseJSON.errors).forEach(function (fieldErrors) {
-                                    fieldErrors.forEach(function (message) {
-                                        messages += `<div>${message}</div>`;
-                                    });
-                                });
-                                $('#edit-formErrors').html(messages).removeClass('d-none');
-                            } else {
-                                alert(xhr.responseJSON?.message || 'Unable to save ticket.');
-                            }
-                        },
-                        complete: function () {
-                            $('#saveEditTicket').prop('disabled', false).text('Save');
-                        }
-                    });
-                });
-
                 // Filters
                 $('#search, #label, #priority, #status').on('change input', function () {
                     clearTimeout(searchDebounce);
@@ -539,6 +552,7 @@
                 const deleteModalElement = document.getElementById('deleteTicketModal');
                 const deleteModal = new bootstrap.Modal(deleteModalElement);
                 let deleteTicketId = null;
+                let editConfirmTicketId = null;
 
                 $('#kanban-board').on('click', '.delete-ticket', function (e) {
                     e.preventDefault();

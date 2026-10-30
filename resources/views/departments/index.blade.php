@@ -122,18 +122,32 @@
     </div>
     <x-delete-confirmation-modal id="deleteDepartmentModal" title="Confirm Delete" message="Are you sure you want to delete this department?" confirm-button-id="confirmDeleteDepartment" confirm-label="Delete" />
 
+    <!-- Edit Confirmation Modal -->
+    <x-edit-confirmation-modal
+        id="editConfirmDepartmentModal"
+        title="Confirm Edit"
+        message="Are you sure you want to edit this department?"
+        confirm-button-id="confirmEditDepartment"
+        confirm-label="Edit"
+    />
+
     @push('scripts')
         <script>
             $(document).ready(function () {
                 const createModal = new bootstrap.Modal(document.getElementById('create-department-modal'));
                 const editModal = new bootstrap.Modal(document.getElementById('edit-department-modal'));
+                const editConfirmModal = new bootstrap.Modal(document.getElementById('editConfirmDepartmentModal'));
                 const deleteModal = new bootstrap.Modal(document.getElementById('deleteDepartmentModal'));
                 let deleteId = null;
+                let editConfirmId = null;
 
                 const table = $('.datatable').DataTable({
                     processing: true,
                     serverSide: false,
-                    ajax: '{{ route("departments.index") }}',
+                    ajax: {
+                        url: '{{ route("departments.index") }}',
+                        dataSrc: 'data'
+                    },
                     columns: [
                         { data: 'DT_RowIndex', orderable: false, searchable: false },
                         { data: 'company_name' },
@@ -177,6 +191,48 @@
                             $('#edit-department_description').val(data.department_description);
                             $('#edit-is_active').val(data.is_active);
                             editModal.show();
+                        },
+                        error: function () { alert('Unable to load data.'); }
+                    });
+                });
+
+                // Confirm Edit before saving
+                $('#edit-department-form').on('submit', function (e) {
+                    e.preventDefault();
+                    editConfirmId = $('#edit-department_id').val();
+                    editConfirmModal.show();
+                });
+
+                $('#confirmEditDepartment').on('click', function () {
+                    if (!editConfirmId) return;
+                    editConfirmModal.hide();
+
+                    const id = $('#edit-department_id').val();
+                    $('#edit-formErrors').addClass('d-none').empty();
+                    $('#saveEditDepartment').prop('disabled', true).text('Saving...');
+
+                    $.ajax({
+                        url: `/departments/${id}`,
+                        method: 'PUT',
+                        data: $('#edit-department-form').serialize(),
+                        success: function (response) {
+                            editModal.hide();
+                            table.ajax.reload(null, false);
+                            $('#successMessage').text(response.message).removeClass('d-none');
+                            setTimeout(() => $('#successMessage').addClass('d-none'), 3000);
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                let messages = '';
+                                Object.values(xhr.responseJSON.errors).forEach(errs => errs.forEach(msg => messages += `<div>${msg}</div>`));
+                                $('#edit-formErrors').html(messages).removeClass('d-none');
+                            } else {
+                                alert('Something went wrong.');
+                            }
+                        },
+                        complete: function () {
+                            $('#saveEditDepartment').prop('disabled', false).text('Update');
+                            editConfirmId = null;
                         }
                     });
                 });
@@ -205,35 +261,6 @@
                         },
                         complete: function () {
                             $('#saveCreateDepartment').prop('disabled', false).text('Create');
-                        }
-                    });
-                });
-
-                $('#edit-department-form').on('submit', function (e) {
-                    e.preventDefault();
-                    const id = $('#edit-department_id').val();
-                    $('#edit-formErrors').addClass('d-none').empty();
-                    $('#saveEditDepartment').prop('disabled', true).text('Saving...');
-
-                    $.ajax({
-                        url: `/departments/${id}`,
-                        method: 'PUT',
-                        data: $(this).serialize(),
-                        success: function (response) {
-                            editModal.hide();
-                            table.ajax.reload(null, false);
-                            $('#successMessage').text(response.message).removeClass('d-none');
-                            setTimeout(() => $('#successMessage').addClass('d-none'), 3000);
-                        },
-                        error: function (xhr) {
-                            if (xhr.status === 422) {
-                                let messages = '';
-                                Object.values(xhr.responseJSON.errors).forEach(errs => errs.forEach(msg => messages += `<div>${msg}</div>`));
-                                $('#edit-formErrors').html(messages).removeClass('d-none');
-                            }
-                        },
-                        complete: function () {
-                            $('#saveEditDepartment').prop('disabled', false).text('Update');
                         }
                     });
                 });

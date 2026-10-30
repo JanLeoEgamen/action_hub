@@ -58,9 +58,6 @@ class Task extends Model
             ->withTimestamps();
     }
 
-    // ---------------------------------------------------------------
-    // Dropdown sources
-    // ---------------------------------------------------------------
 
     public static function getActiveCategories()
     {
@@ -106,6 +103,18 @@ class Task extends Model
             ->whereNull('tasks.deleted_at')
             ->where('tasks.is_active', 1);
 
+        // Base visibility: task is only visible to its owner or an active assignee
+        $query->where(function ($q) use ($currentUserId) {
+            $q->where('tasks.created_by', $currentUserId)
+              ->orWhereIn('tasks.id', function ($sub) use ($currentUserId) {
+                  $sub->select('task_id')
+                      ->from('task_assignees')
+                      ->where('user_id', $currentUserId)
+                      ->where('is_active', 1)
+                      ->whereNull('deleted_at');
+              });
+        });
+
         // Filter
         if ($filter === 'assigned_by_me') {
             $query->where('tasks.created_by', $currentUserId);
@@ -117,8 +126,6 @@ class Task extends Model
                     ->where('is_active', 1)
                     ->whereNull('deleted_at');
             });
-        } else {
-            // All tasks — show all active, non-deleted tasks (no user restriction)
         }
 
         // Optionals
@@ -213,10 +220,6 @@ class Task extends Model
         return $tasks;
     }
 
-    // ---------------------------------------------------------------
-    // Single-task reads
-    // ---------------------------------------------------------------
-
     // find single task for edit modal
     public static function getTaskForEdit($id)
     {
@@ -244,6 +247,7 @@ class Task extends Model
             'status'       => $task->status,
             'due_date'     => $task->due_date,
             'is_active'    => (bool) $task->is_active,
+            'created_by'   => $task->created_by,
             'assignee_ids' => array_map('intval', $assigneeIds),
         ];
     }
@@ -267,12 +271,15 @@ class Task extends Model
     // return if the task is accessible by user
     public static function isAccessibleBy($task, int $userId): bool
     {
-        if ((int) $task->created_by === $userId) {
+        $createdBy = is_array($task) ? ($task['created_by'] ?? null) : $task->created_by;
+        $taskId    = is_array($task) ? ($task['id'] ?? null)    : $task->id;
+
+        if ((int) $createdBy === $userId) {
             return true;
         }
 
         return DB::table('task_assignees')
-            ->where('task_id', $task->id)
+            ->where('task_id', $taskId)
             ->where('user_id', $userId)
             ->where('is_active', 1)
             ->whereNull('deleted_at')
@@ -408,10 +415,7 @@ class Task extends Model
             ->get();
     }
 
-    // ---------------------------------------------------------------
-    // Dashboard - Personal (my overview)
-    // ---------------------------------------------------------------
-
+    // my overview for dashboard
     protected static function personalBase(int $userId)
     {
         return DB::table('tasks')
@@ -485,14 +489,7 @@ class Task extends Model
         ];
     }
 
-    // ---------------------------------------------------------------
-    // Writes
-    // ---------------------------------------------------------------
-
-    /**
-     * Create a task + assignees in one transaction.
-     * created_by is always derived server-side.
-     */
+    
     public static function createTask(array $data, int $creatorId)
     {
         return DB::transaction(function () use ($data, $creatorId) {
@@ -514,7 +511,6 @@ class Task extends Model
         });
     }
 
-    // update task assignees and other fields in one transaction
     public static function updateTask($id, array $data)
     {
         return DB::transaction(function () use ($id, $data) {

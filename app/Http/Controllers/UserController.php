@@ -63,7 +63,7 @@ class UserController extends Controller implements HasMiddleware
                 ->make(true);
         }
 
-        $groups = Group::getAll();
+        $groups = Group::getForSelection();
         $roles = Role::orderBy('name', 'ASC')->get();
         return view('users.index', compact('roles', 'groups'));
     }
@@ -73,7 +73,7 @@ class UserController extends Controller implements HasMiddleware
     {
         return response()->json([
             'roles' => Role::orderBy('name', 'ASC')->get(),
-            'groups' => Group::getAll(),
+            'groups' => Group::getForSelection(),
         ]);
     }
 
