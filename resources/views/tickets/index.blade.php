@@ -312,7 +312,7 @@
         title="Confirm Edit"
         message="Are you sure you want to edit this ticket?"
         confirm-button-id="confirmEditTicket"
-        confirm-label="Edit"
+        confirm-label="Save Ticket"
     />
 
     @push('scripts')

@@ -240,7 +240,7 @@
         title="Confirm Edit"
         message="Are you sure you want to edit this project?"
         confirm-button-id="confirmEditProject"
-        confirm-label="Edit"
+        confirm-label="Save Project"
     />
 
     @push('scripts')

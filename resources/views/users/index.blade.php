@@ -350,7 +350,7 @@
         title="Confirm Edit"
         message="Are you sure you want to edit this user?"
         confirm-button-id="confirmEditUser"
-        confirm-label="Edit"
+        confirm-label="Save User"
     />
 
     @push('scripts')

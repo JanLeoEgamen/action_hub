@@ -284,7 +284,7 @@
         title="Confirm Edit"
         message="Are you sure you want to edit this role?"
         confirm-button-id="confirmEditRole"
-        confirm-label="Edit"
+        confirm-label="Save Role"
     />
 
     @push('scripts')

@@ -122,7 +122,7 @@
         title="Confirm Edit"
         message="Are you sure you want to edit this company?"
         confirm-button-id="confirmEditCompany"
-        confirm-label="Edit"
+        confirm-label="Save Company"
     />
 
     @push('scripts')

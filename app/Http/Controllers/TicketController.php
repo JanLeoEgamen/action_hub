@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class TicketController extends Controller implements HasMiddleware
 {
@@ -84,7 +85,7 @@ class TicketController extends Controller implements HasMiddleware
             return response()->json(['message' => 'Project not found.'], 404);
         }
 
-        $validated = $this->validateTicket($request);
+        $validated = $this->validateTicket($request, (int) $projectId);
 
         $this->ensureAssigneesAreProjectMembers((int) $projectId, $validated['assignee_ids'] ?? []);
 
@@ -105,7 +106,7 @@ class TicketController extends Controller implements HasMiddleware
         $ticket = Ticket::findById($id);
         $projectId = $ticket->project_id;
 
-        $validated = $this->validateTicket($request);
+        $validated = $this->validateTicket($request, (int) $projectId, $ticket);
 
         $this->ensureAssigneesAreProjectMembers((int) $projectId, $validated['assignee_ids'] ?? []);
 
@@ -152,9 +153,9 @@ class TicketController extends Controller implements HasMiddleware
         ]);
     }
 
-    private function validateTicket(Request $request): array
+    private function validateTicket(Request $request, int $projectId = null, $existingTicket = null): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'title'       => 'required|string|between:3,255',
             'description' => 'nullable|string',
             'label'       => ['required', Rule::in(['bug', 'feature', 'improvement', 'task'])],
@@ -165,6 +166,38 @@ class TicketController extends Controller implements HasMiddleware
             'assignee_ids'   => 'nullable|array',
             'assignee_ids.*' => 'integer|exists:users,id',
         ]);
+
+        // Due date must fall within the project start and end dates (if set).
+        $dueDate = $request->input('due_date');
+        if ($dueDate && $projectId) {
+            $project = Project::findById($projectId);
+            if ($project) {
+                $startDate = $project->start_date ?? null;
+                $endDate   = $project->end_date   ?? null;
+
+                // Determine if the due date is being changed (create = always changed when provided).
+                $isChanged = ($existingTicket === null)
+                    ? true
+                    : $dueDate !== (($existingTicket->due_date ?? null) instanceof \Carbon\Carbon
+                        ? ($existingTicket->due_date ?? null)->format('Y-m-d')
+                        : ($existingTicket->due_date ?? null));
+
+                if ($isChanged) {
+                    if ($startDate && $dueDate < $startDate) {
+                        throw ValidationException::withMessages([
+                            'due_date' => ['The due date cannot be earlier than the project start date (' . $startDate . ').'],
+                        ]);
+                    }
+                    if ($endDate && $dueDate > $endDate) {
+                        throw ValidationException::withMessages([
+                            'due_date' => ['The due date cannot be later than the project end date (' . $endDate . ').'],
+                        ]);
+                    }
+                }
+            }
+        }
+
+        return $validated;
     }
 
     /**

@@ -128,7 +128,7 @@
         title="Confirm Edit"
         message="Are you sure you want to edit this department?"
         confirm-button-id="confirmEditDepartment"
-        confirm-label="Edit"
+        confirm-label="Save Department"
     />
 
     @push('scripts')

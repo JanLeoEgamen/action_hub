@@ -312,7 +312,7 @@
         title="Confirm Edit"
         message="Are you sure you want to edit this task?"
         confirm-button-id="confirmEditTask"
-        confirm-label="Edit"
+        confirm-label="Save Task"
     />
 
     @push('scripts')

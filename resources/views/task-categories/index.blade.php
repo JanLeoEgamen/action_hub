@@ -151,7 +151,7 @@
         title="Confirm Edit"
         message="Are you sure you want to edit this task category?"
         confirm-button-id="confirmEditCategory"
-        confirm-label="Edit"
+        confirm-label="Save Task Category"
     />
 
     @push('scripts')
