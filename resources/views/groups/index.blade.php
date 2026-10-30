@@ -119,7 +119,7 @@
         title="Confirm Edit"
         message="Are you sure you want to edit this group?"
         confirm-button-id="confirmEditGroup"
-        confirm-label="Edit"
+        confirm-label="Save Group"
     />
 
     @push('scripts')
