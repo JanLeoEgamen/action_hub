@@ -1,4 +1,4 @@
-﻿<x-app-layout>
+<x-app-layout>
     <x-slot name="header">
         <x-page-header
             title="Projects"
@@ -98,7 +98,7 @@
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="create-start_date" class="form-label">Start Date</label>
-                                <input type="date" name="start_date" id="create-start_date" class="form-control">
+                                <input type="date" name="start_date" id="create-start_date" class="form-control" min="{{ now()->format('Y-m-d') }}">
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="create-end_date" class="form-label">End Date</label>
@@ -183,7 +183,7 @@
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="edit-start_date" class="form-label">Start Date</label>
-                                <input type="date" name="start_date" id="edit-start_date" class="form-control">
+                                <input type="date" name="start_date" id="edit-start_date" class="form-control" min="{{ now()->format('Y-m-d') }}">
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="edit-end_date" class="form-label">End Date</label>
@@ -269,6 +269,19 @@
                     return $('<div>').text(s == null ? '' : s).html();
                 }
 
+                function formatDate(isoDate) {
+                    if (!isoDate) return '';
+                    const parts = isoDate.split('-');
+                    if (parts.length !== 3) return isoDate;
+                    const y = parseInt(parts[0], 10);
+                    const m = parseInt(parts[1], 10);
+                    const d = parseInt(parts[2], 10);
+                    const date = new Date(y, m - 1, d);
+                    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+                    return `${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+                }
+
                 function loadList() {
                     const params = {
                         filter:    $('#filter').val(),
@@ -323,8 +336,8 @@
                                         <ul class="list-unstyled small mb-3">
                                             <li><strong>Owner:</strong> ${escapeHtml(p.owner || '\u2014')}</li>
                                             <li><strong>Tickets:</strong> ${p.tickets}</li>
-                                            <li><strong>Start:</strong> ${escapeHtml(p.start_date || '\u2014')}</li>
-                                            <li><strong>End:</strong> ${escapeHtml(p.end_date || '\u2014')}</li>
+                                            <li><strong>Start:</strong> ${escapeHtml(formatDate(p.start_date) || '\u2014')}</li>
+                                            <li><strong>End:</strong> ${escapeHtml(formatDate(p.end_date) || '\u2014')}</li>
                                         </ul>
                                         <div class="mt-auto d-flex gap-2">
                                             <button type="button" class="btn btn-sm btn-success edit-project" data-id="${p.id}">Edit</button>
@@ -380,6 +393,7 @@
                             $('#edit-description').val(project.description);
                             $('#edit-status_form').val(project.status);
                             $('#edit-start_date').val(project.start_date);
+                            originalEditStartDate = project.start_date;
                             $('#edit-end_date').val(project.end_date);
                             $('#edit-is_active_form').prop('checked', !!project.is_active);
                             $('#edit-member_ids input[type="checkbox"]').prop('checked', false);
@@ -403,6 +417,22 @@
                 // Confirm Edit before saving
                 $('#edit-project-form').on('submit', function (e) {
                     e.preventDefault();
+
+                    $('#edit-formErrors').addClass('d-none').empty();
+
+                    const editStartDate = $('#edit-start_date').val();
+                    const today = new Date().toISOString().split('T')[0];
+                    if (editStartDate && editStartDate !== originalEditStartDate && editStartDate < today) {
+                        $('#edit-formErrors').html('<div>The start date cannot be earlier than today.</div>').removeClass('d-none');
+                        return;
+                    }
+
+                    const editEndDate = $('#edit-end_date').val();
+                    if (editStartDate && editEndDate && editEndDate < editStartDate) {
+                        $('#edit-formErrors').html('<div>The end date cannot be earlier than the start date.</div>').removeClass('d-none');
+                        return;
+                    }
+
                     editConfirmProjectId = $('#edit-project_id').val();
                     editConfirmModal.show();
                 });
@@ -452,6 +482,22 @@
                     e.preventDefault();
 
                     $('#create-formErrors').addClass('d-none').empty();
+
+                    const createStartDate = $('#create-start_date').val();
+                    const today = new Date().toISOString().split('T')[0];
+                    if (createStartDate && createStartDate < today) {
+                        $('#create-formErrors').html('<div>The start date cannot be earlier than today.</div>').removeClass('d-none');
+                        $('#saveCreateProject').prop('disabled', false).text('Save');
+                        return;
+                    }
+
+                    const createEndDate = $('#create-end_date').val();
+                    if (createStartDate && createEndDate && createEndDate < createStartDate) {
+                        $('#create-formErrors').html('<div>The end date cannot be earlier than the start date.</div>').removeClass('d-none');
+                        $('#saveCreateProject').prop('disabled', false).text('Save');
+                        return;
+                    }
+
                     $('#saveCreateProject').prop('disabled', true).text('Saving...');
 
                     $.ajax({
@@ -499,6 +545,7 @@
                 const deleteModal = new bootstrap.Modal(deleteModalElement);
                 let deleteProjectId = null;
                 let editConfirmProjectId = null;
+                let originalEditStartDate = null;
 
                 $('#projectCardGrid').on('click', '.delete-project', function (e) {
                     e.preventDefault();
@@ -538,3 +585,4 @@
         </script>
     @endpush
 </x-app-layout>
+

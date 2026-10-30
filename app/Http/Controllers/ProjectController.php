@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class ProjectController extends Controller implements HasMiddleware
 {
@@ -83,7 +84,9 @@ class ProjectController extends Controller implements HasMiddleware
             return response()->json(['message' => 'Project not found.'], 404);
         }
 
-        $validated = $this->validateProject($request);
+        $project = Project::findById($id);
+
+        $validated = $this->validateProject($request, $project);
 
         Project::updateProject($id, $validated);
 
@@ -110,9 +113,9 @@ class ProjectController extends Controller implements HasMiddleware
         ]);
     }
 
-    private function validateProject(Request $request): array
+    private function validateProject(Request $request, $existingProject = null): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'name'        => 'required|string|between:3,255',
             'description' => 'nullable|string',
             'status'      => ['required', Rule::in(['planning', 'in_progress', 'on_hold', 'completed', 'cancelled'])],
@@ -122,5 +125,23 @@ class ProjectController extends Controller implements HasMiddleware
             'member_ids.*'=> 'integer|exists:users,id',
             'is_active'   => 'nullable|boolean',
         ]);
+
+        // Start date cannot be earlier than today.
+        $startDate = $request->input('start_date');
+        if ($startDate) {
+            $today = now()->toDateString();
+
+            $isChanged = ($existingProject === null)
+                ? true
+                : $startDate !== ($existingProject->start_date ?? null);
+
+            if ($isChanged && $startDate < $today) {
+                throw ValidationException::withMessages([
+                    'start_date' => ['The start date cannot be earlier than today.'],
+                ]);
+            }
+        }
+
+        return $validated;
     }
 }

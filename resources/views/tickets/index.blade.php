@@ -155,8 +155,9 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="create-due_date" class="form-label">Due Date</label>
-                                <input type="date" name="due_date" id="create-due_date" class="form-control">
-                            </div>
+                                <input type="date" name="due_date" id="create-due_date" class="form-control"
+                                    min="{{ $project->start_date ? date('Y-m-d', strtotime($project->start_date)) : '' }}"
+                                    max="{{ $project->end_date ? date('Y-m-d', strtotime($project->end_date)) : '' }}"                            </div>
                             <div class="col-md-6 mb-3 d-flex align-items-end">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox"
@@ -257,8 +258,9 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="edit-due_date" class="form-label">Due Date</label>
-                                <input type="date" name="due_date" id="edit-due_date" class="form-control">
-                            </div>
+                                <input type="date" name="due_date" id="edit-due_date" class="form-control"
+                                    min="{{ $project->start_date ? date('Y-m-d', strtotime($project->start_date)) : '' }}"
+                                    max="{{ $project->end_date ? date('Y-m-d', strtotime($project->end_date)) : '' }}"                            </div>
                             <div class="col-md-6 mb-3 d-flex align-items-end">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox"
@@ -318,7 +320,9 @@
         <script>
             $(document).ready(function () {
                 const PROJECT_ID = {{ $project->id }};
-
+                const PROJECT_START_DATE = "{{ $project->start_date ? date('Y-m-d', strtotime($project->start_date)) : '' }}";
+                const PROJECT_END_DATE = "{{ $project->end_date ? date('Y-m-d', strtotime($project->end_date)) : '' }}";
+                
                 const createModal = new bootstrap.Modal(document.getElementById('create-ticket-modal'));
                 const editModal = new bootstrap.Modal(document.getElementById('edit-ticket-modal'));
                 const editConfirmModal = new bootstrap.Modal(document.getElementById('editConfirmTicketModal'));
@@ -339,6 +343,19 @@
 
                 function escapeHtml(s) {
                     return $('<div>').text(s == null ? '' : s).html();
+                }
+
+                function formatDate(isoDate) {
+                    if (!isoDate) return '';
+                    const parts = isoDate.split('-');
+                    if (parts.length !== 3) return isoDate;
+                    const y = parseInt(parts[0], 10);
+                    const m = parseInt(parts[1], 10);
+                    const d = parseInt(parts[2], 10);
+                    const date = new Date(y, m - 1, d);
+                    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+                    return `${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
                 }
 
                 // loading board
@@ -396,7 +413,7 @@
                                         <h6 class="card-title">${escapeHtml(ticket.title)}</h6>
                                         <p class="card-text text-muted small">${escapeHtml(ticket.description || '')}</p>
                                         <small class="text-muted">Label: ${escapeHtml(ticket.label)} | Priority: ${escapeHtml(ticket.priority)}</small><br>
-                                        ${ticket.due_date ? `<small class="text-muted">Due: ${escapeHtml(ticket.due_date)}</small><br>` : ''}
+                                        ${ticket.due_date ? `<small class="text-muted">Due: ${escapeHtml(formatDate(ticket.due_date))}</small><br>` : ''}
                                         ${ticket.assignee_names ? `<small class="text-info">Assignee: ${escapeHtml(ticket.assignee_names)}</small><br>` : ''}
                                         <button type="button" class="btn btn-sm btn-success edit-ticket" data-id="${ticket.id}">Edit</button>
                                         <button type="button" class="btn btn-sm btn-danger delete-ticket" data-id="${ticket.id}">Delete</button>
@@ -450,6 +467,7 @@
                             $('#edit-priority_form').val(ticket.priority);
                             $('#edit-status_form').val(ticket.status);
                             $('#edit-due_date').val(ticket.due_date);
+                            originalEditDueDate = ticket.due_date;
                             $('#edit-is_active').prop('checked', !!ticket.is_active);
                             $('#edit-assignee_ids input[type="checkbox"]').prop('checked', false);
                             (ticket.assignee_ids || []).forEach(function (uid) {
@@ -471,6 +489,21 @@
                 // Confirm Edit before saving
                 $('#edit-ticket-form').on('submit', function (e) {
                     e.preventDefault();
+
+                    $('#edit-formErrors').addClass('d-none').empty();
+
+                    const editDueDate = $('#edit-due_date').val();
+                    if (editDueDate && editDueDate !== originalEditDueDate) {
+                        if (PROJECT_START_DATE && editDueDate < PROJECT_START_DATE) {
+                            $('#edit-formErrors').html('<div>The due date cannot be earlier than the project start date (' + PROJECT_START_DATE + ').</div>').removeClass('d-none');
+                            return;
+                        }
+                        if (PROJECT_END_DATE && editDueDate > PROJECT_END_DATE) {
+                            $('#edit-formErrors').html('<div>The due date cannot be later than the project end date (' + PROJECT_END_DATE + ').</div>').removeClass('d-none');
+                            return;
+                        }
+                    }
+
                     editConfirmTicketId = $('#edit-ticket_id').val();
                     editConfirmModal.show();
                 });
@@ -510,6 +543,19 @@
                     e.preventDefault();
 
                     $('#create-formErrors').addClass('d-none').empty();
+
+                    const createDueDate = $('#create-due_date').val();
+                    if (createDueDate && PROJECT_START_DATE && createDueDate < PROJECT_START_DATE) {
+                        $('#create-formErrors').html('<div>The due date cannot be earlier than the project start date (' + PROJECT_START_DATE + ').</div>').removeClass('d-none');
+                        $('#saveCreateTicket').prop('disabled', false).text('Save');
+                        return;
+                    }
+                    if (createDueDate && PROJECT_END_DATE && createDueDate > PROJECT_END_DATE) {
+                        $('#create-formErrors').html('<div>The due date cannot be later than the project end date (' + PROJECT_END_DATE + ').</div>').removeClass('d-none');
+                        $('#saveCreateTicket').prop('disabled', false).text('Save');
+                        return;
+                    }
+
                     $('#saveCreateTicket').prop('disabled', true).text('Saving...');
 
                     $.ajax({
@@ -553,6 +599,7 @@
                 const deleteModal = new bootstrap.Modal(deleteModalElement);
                 let deleteTicketId = null;
                 let editConfirmTicketId = null;
+                let originalEditDueDate = null;
 
                 $('#kanban-board').on('click', '.delete-ticket', function (e) {
                     e.preventDefault();

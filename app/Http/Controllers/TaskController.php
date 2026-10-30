@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class TaskController extends Controller implements HasMiddleware
 {
@@ -105,7 +106,7 @@ class TaskController extends Controller implements HasMiddleware
             ], 403);
         }
 
-        $validated = $this->validateTask($request);
+        $validated = $this->validateTask($request, $task);
 
         Task::updateTask($id, $validated);
 
@@ -172,9 +173,9 @@ class TaskController extends Controller implements HasMiddleware
     }
 
     
-    private function validateTask(Request $request): array
+    private function validateTask(Request $request, $existingTask = null): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'title'          => 'required|string|between:3,255',
             'description'    => 'nullable|string',
             'category_id'    => [
@@ -190,5 +191,21 @@ class TaskController extends Controller implements HasMiddleware
             'status'         => ['required', Rule::in(['pending', 'in_progress', 'completed'])],
             'is_active'      => 'nullable|boolean',
         ]);
+
+        // Due date cannot be earlier than today
+        $dueDate = $request->input('due_date');
+        $today = now()->toDateString();
+        if ($dueDate && $dueDate < $today) {
+            $isChanged = ($existingTask === null)
+                ? true
+                : $dueDate !== (($existingTask->due_date ?? null));
+            if ($isChanged) {
+                throw ValidationException::withMessages([
+                    'due_date' => ['The due date cannot be earlier than today.'],
+                ]);
+            }
+        }
+
+        return $validated;
     }
 }

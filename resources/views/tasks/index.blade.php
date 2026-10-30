@@ -138,7 +138,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="create-due_date" class="form-label">Due Date</label>
-                                <input type="date" name="due_date" id="create-due_date" class="form-control">
+                                <input type="date" name="due_date" id="create-due_date" class="form-control" min="{{ now()->format('Y-m-d') }}">
                             </div>
                         </div>
 
@@ -244,7 +244,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="edit-due_date" class="form-label">Due Date</label>
-                                <input type="date" name="due_date" id="edit-due_date" class="form-control">
+                                <input type="date" name="due_date" id="edit-due_date" class="form-control" min="{{ now()->format('Y-m-d') }}">
                             </div>
                         </div>
 
@@ -349,6 +349,19 @@
                     return `${y}-${m}-${day}`;
                 }
 
+                function formatDate(isoDate) {
+                    if (!isoDate) return '';
+                    const parts = isoDate.split('-');
+                    if (parts.length !== 3) return isoDate;
+                    const y = parseInt(parts[0], 10);
+                    const m = parseInt(parts[1], 10);
+                    const d = parseInt(parts[2], 10);
+                    const date = new Date(y, m - 1, d);
+                    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+                    return `${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+                }
+
                 function isOverdue(task) {
                     if (!task.due_date) return false;
                     if (task.status === 'completed') return false;
@@ -408,7 +421,7 @@
                                     <div class="card-body">
                                         <h6 class="card-title">${escapeHtml(task.title)}</h6>
                                         <p class="card-text text-muted small">${escapeHtml(task.description || '')}</p>
-                                        ${task.due_date ? `<small class="text-muted">Due: ${escapeHtml(task.due_date)}</small><br>` : ''}
+                                        ${task.due_date ? `<small class="text-muted">Due: ${escapeHtml(formatDate(task.due_date))}</small><br>` : ''}
                                         ${task.creator ? `<small class="text-muted">Created by: ${escapeHtml(task.creator)}</small><br>` : ''}
                                         <button type="button" class="btn btn-sm btn-success edit-task" data-id="${task.id}">Edit</button>
                                         <button type="button" class="btn btn-sm btn-danger delete-task" data-id="${task.id}">Delete</button>
@@ -432,6 +445,7 @@
                     $('#edit-task_id').val('');
                     $('#edit-assignee_ids input[type="checkbox"]').prop('checked', false);
                     $('#edit-formErrors').addClass('d-none').empty();
+                    originalEditDueDate = null;
                 }
 
                 $('#create-task').on('click', function () {
@@ -463,6 +477,7 @@
                             $('#edit-category_ids input[type="radio"]').prop('checked', false);
                             $('#edit-category_ids input[type="radio"][value="' + task.category_id + '"]').prop('checked', true);
                             $('#edit-due_date').val(task.due_date);
+                            originalEditDueDate = task.due_date;
                             $('#edit-status_form').val(task.status);
                             $('#edit-is_active').val(task.is_active ? '1' : '0');
                             $('#edit-assignee_ids input[type="checkbox"]').prop('checked', false);
@@ -524,6 +539,14 @@
                     e.preventDefault();
 
                     $('#create-formErrors').addClass('d-none').empty();
+
+                    const createDueDate = $('#create-due_date').val();
+                    const today = new Date().toISOString().split('T')[0];
+                    if (createDueDate && createDueDate < today) {
+                        $('#create-formErrors').html('<div>The due date cannot be earlier than today.</div>').removeClass('d-none');
+                        return;
+                    }
+
                     $('#saveCreateTask').prop('disabled', true).text('Saving...');
 
                     $.ajax({
@@ -557,6 +580,15 @@
                 $('#edit-task-form').on('submit', function (e) {
                     e.preventDefault();
 
+                    $('#edit-formErrors').addClass('d-none').empty();
+
+                    const editDueDate = $('#edit-due_date').val();
+                    const today = new Date().toISOString().split('T')[0];
+                    if (editDueDate && editDueDate !== originalEditDueDate && editDueDate < today) {
+                        $('#edit-formErrors').html('<div>The due date cannot be earlier than today.</div>').removeClass('d-none');
+                        return;
+                    }
+
                     editConfirmTaskId = $('#edit-task_id').val();
                     editConfirmModal.show();
                 });
@@ -566,6 +598,7 @@
                 const deleteModal = new bootstrap.Modal(deleteModalElement);
                 let deleteTaskId = null;
                 let editConfirmTaskId = null;
+                let originalEditDueDate = null;
 
                 $('#kanban-board').on('click', '.delete-task', function (e) {
                     e.preventDefault();
